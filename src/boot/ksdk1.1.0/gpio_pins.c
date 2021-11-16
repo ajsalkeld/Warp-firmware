@@ -52,12 +52,35 @@ gpio_output_pin_user_config_t	outputPins[] = {
 			.config.driveStrength = kPortLowDriveStrength,
 		},
 		*/
-		{
+    #if (WARP_BUILD_ENABLE_DEVADXL362)
+        // Only if using ADXL362. Otherwise, treat as normal SPI port.
+        {
 			.pinName = kWarpPinADXL362_SPI_nCS,
 			.config.outputLogic = 1,
 			.config.slewRate = kPortSlowSlewRate,
 			.config.driveStrength = kPortLowDriveStrength,
 		},
+    #endif
+    #if (WARP_BUILD_ENABLE_DEVSSD1331)
+        {
+                .pinName = kSSD1331PinCSn,
+                .config.outputLogic = 1,
+                .config.slewRate = kPortSlowSlewRate,
+                .config.driveStrength = kPortLowDriveStrength,
+        },
+        {
+                .pinName = kSSD1331PinDC,
+                .config.outputLogic = 1,
+                .config.slewRate = kPortSlowSlewRate,
+                .config.driveStrength = kPortLowDriveStrength,
+        },
+        {
+                .pinName = kSSD1331PinRST,
+                .config.outputLogic = 1,
+                .config.slewRate = kPortSlowSlewRate,
+                .config.driveStrength = kPortLowDriveStrength,
+        },
+    #endif
 		{
 			.pinName = kWarpPinAT45DB_SPI_nCS,
 			.config.outputLogic = 1,

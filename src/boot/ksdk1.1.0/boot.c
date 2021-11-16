@@ -63,6 +63,7 @@
 #include "SEGGER_RTT.h"
 
 
+
 #define							kWarpConstantStringI2cFailure		"\rI2C failed, reg 0x%02x, code %d\n"
 #define							kWarpConstantStringErrorInvalidVoltage	"\rInvalid supply voltage [%d] mV!"
 #define							kWarpConstantStringErrorSanity		"\rSanity check failed!"
@@ -174,6 +175,10 @@
 #if (WARP_BUILD_ENABLE_DEVBGX)
 	#include "devBGX.h"
 	volatile WarpUARTDeviceState			deviceBGXState;
+#endif
+
+#if (WARP_BUILD_ENABLE_DEVSSD1331)
+    #include "devSSD1331.h"
 #endif
 
 
@@ -1606,7 +1611,7 @@ main(void)
 
 	#if (WARP_BUILD_ENABLE_DEVMMA8451Q)
 //		initMMA8451Q(	0x1C	/* i2cAddress */,	&deviceMMA8451QState,		kWarpDefaultSupplyVoltageMillivoltsMMA8451Q	);
-		initMMA8451Q(	0x1C	/* i2cAddress */,		kWarpDefaultSupplyVoltageMillivoltsMMA8451Q	);
+		initMMA8451Q(	0x1D	/* i2cAddress */,		kWarpDefaultSupplyVoltageMillivoltsMMA8451Q	);
 	#endif
 
 	#if (WARP_BUILD_ENABLE_DEVLPS25H)
@@ -1844,7 +1849,11 @@ main(void)
 		warpPrint("initBGX()... ");
 		initBGX(kWarpDefaultSupplyVoltageMillivoltsBGX);
 		warpPrint("done.\n");
-	#endif
+    #endif
+
+    #if (WARP_BUILD_ENABLE_DEVSSD1331)
+        devSSD1331init();
+    #endif
 
 	/*
 	 *	If WARP_BUILD_DISABLE_SUPPLIES_BY_DEFAULT, will turn of the supplies
@@ -2015,7 +2024,7 @@ main(void)
 			}
 			warpPrint("Should not get here...");
 		}
-	#endif
+    #endif
 
 	while (1)
 	{
