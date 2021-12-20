@@ -16,22 +16,6 @@
 volatile uint8_t	inBuffer[1];
 volatile uint8_t	payloadBytes[1];
 
-
-/*
- *	Override Warp firmware's use of these pins and define new aliases.
- */
-// Moved to gpio_pins.h
-/*enum
-{
-    // Port PTA8 conflicts with ADXL362. Disable in config.h or use PTA7.
-    // gpio_pins.c outputPins[] is patched to not include the configuration for ADXL362
-    kSSD1331PinMOSI		= GPIO_MAKE_PIN(HW_GPIOA, 8),
-    kSSD1331PinSCK		= GPIO_MAKE_PIN(HW_GPIOA, 9),
-    kSSD1331PinCSn		= GPIO_MAKE_PIN(HW_GPIOB, 13),
-    kSSD1331PinDC		= GPIO_MAKE_PIN(HW_GPIOA, 12),
-    kSSD1331PinRST		= GPIO_MAKE_PIN(HW_GPIOB, 0),
-};*/
-
 static int
 writeCommand(uint8_t commandByte)
 {
@@ -163,21 +147,36 @@ devSSD1331init(void)
     /*
      *	Any post-initialization drawing commands go here.
      */
-    writeCommand(kSSD1331CommandDRAWRECT);
-    writeCommand(0x00);     // First Col
-    writeCommand(0x00);     // First Row
-    writeCommand(0x5E);     // Last Col
-    writeCommand(0x3E);     // Last Row
-    writeCommand(0x10);     // Line R
-    writeCommand(0x3F);     // Line G
-    writeCommand(0x00);     // Line B
-    writeCommand(0x10);     // Fill R
-    writeCommand(0x3F);     // Fill G
-    int status = writeCommand(0x00);    // Fill B
+    struct RGB light_green = {
+            0x10, 0x3F, 0x00
+    };
+
+    int status = devSSD1331DrawRectangle(0x00, 0x3E, 0x00, 0x5E, light_green, light_green);
+
     if (status != kWarpStatusOK)     SEGGER_RTT_WriteString(0, "\r\n\tStatus not OK \n");
 
     SEGGER_RTT_WriteString(0, "\r\n\tDone with draw rectangle... \n");
 
-
     return 0;
+}
+
+int devSSD1331DrawRectangle (uint16_t first_row, uint16_t last_row, uint16_t first_col, uint16_t last_col,
+                             struct RGB line, struct RGB fill)
+{
+    /*
+     *	Any post-initialization drawing commands go here.
+     */
+    writeCommand(kSSD1331CommandDRAWRECT);
+    writeCommand(first_col);     // First Col
+    writeCommand(first_row);     // First Row
+    writeCommand(last_col);     // Last Col = 94 = 0x5E
+    writeCommand(last_row);     // Last Row = 62 = 0x3E
+    writeCommand(line.R);     // Line R
+    writeCommand(line.G);     // Line G
+    writeCommand(line.B);     // Line B
+    writeCommand(fill.R);     // Fill R
+    writeCommand(fill.G);     // Fill G
+    int status = writeCommand(fill.B);    // Fill B
+
+    return status;
 }

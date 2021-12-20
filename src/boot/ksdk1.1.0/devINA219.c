@@ -153,7 +153,6 @@ configureSensorINA219(struct ConfigINA219 config)
 WarpStatus
 readSensorRegisterINA219(uint8_t registerPointer, int numberOfBytes)
 {
-	uint8_t		cmdBuf[1] = {0xFF};
 	i2c_status_t	status;
 
 

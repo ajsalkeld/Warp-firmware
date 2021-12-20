@@ -1,7 +1,9 @@
 /*
  *	See https://github.com/adafruit/Adafruit-SSD1331-OLED-Driver-Library-for-Arduino for the Arduino driver.
  */
-
+#ifndef DEVSSD1331_H
+#define DEVSSD1331_H
+#include <stdint.h>
 typedef enum
 {
 	kSSD1331ColororderRGB		= 1,
@@ -42,4 +44,13 @@ typedef enum
 	kSSD1331CommandVCOMH		= 0xBE,
 } SSD1331Commands;
 
+struct RGB {
+    uint16_t R;
+    uint16_t G;
+    uint16_t B;
+};
+
 int	devSSD1331init(void);
+int devSSD1331DrawRectangle (uint16_t first_row, uint16_t last_row, uint16_t first_col, uint16_t last_col,
+                             struct RGB line, struct RGB fill);
+#endif
