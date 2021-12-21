@@ -16,16 +16,41 @@
 volatile uint8_t	inBuffer[1];
 volatile uint8_t	payloadBytes[1];
 
-static int
-writeCommand(uint8_t commandByte)
-{
-	spi_status_t status;
+GFXfont * devSSD1331font = &FreeSans8pt7b;
 
-	/*
-	 *	Drive /CS low.
-	 *
-	 *	Make sure there is a high-to-low transition by first driving high, delay, then drive low.
-	 */
+void devSSD1331SetupSPI (void)
+{
+    /*
+     *	Override Warp firmware's use of these pins.
+     *
+     *	Re-configure SPI to be on PTA8 and PTA9 for MOSI and SCK respectively.
+     */
+    PORT_HAL_SetMuxMode(PORTA_BASE, 8u, kPortMuxAlt3);
+    PORT_HAL_SetMuxMode(PORTA_BASE, 9u, kPortMuxAlt3);
+
+    warpEnableSPIpins();
+
+    /*
+     *	Override Warp firmware's use of these pins.
+     *
+     *	Reconfigure to use as GPIO.
+     */
+    PORT_HAL_SetMuxMode(PORTB_BASE, 13u, kPortMuxAsGpio);
+    PORT_HAL_SetMuxMode(PORTA_BASE, 12u, kPortMuxAsGpio);
+    PORT_HAL_SetMuxMode(PORTB_BASE, 0u, kPortMuxAsGpio);
+}
+
+static int writeCommand(uint8_t commandByte)
+{
+    spi_status_t status;
+    if (!spi_enabled) devSSD1331SetupSPI();
+
+
+    /*
+     *	Drive /CS low.
+     *
+     *	Make sure there is a high-to-low transition by first driving high, delay, then drive low.
+     */
 	GPIO_DRV_SetPinOutput(kSSD1331PinCSn);
 	OSA_TimeDelay(10);
 	GPIO_DRV_ClearPinOutput(kSSD1331PinCSn);
@@ -53,27 +78,9 @@ writeCommand(uint8_t commandByte)
 
 
 
-int
-devSSD1331init(void)
+int devSSD1331init(void)
 {
-    /*
-     *	Override Warp firmware's use of these pins.
-     *
-     *	Re-configure SPI to be on PTA8 and PTA9 for MOSI and SCK respectively.
-     */
-    PORT_HAL_SetMuxMode(PORTA_BASE, 8u, kPortMuxAlt3);
-    PORT_HAL_SetMuxMode(PORTA_BASE, 9u, kPortMuxAlt3);
-
-    warpEnableSPIpins();
-
-    /*
-     *	Override Warp firmware's use of these pins.
-     *
-     *	Reconfigure to use as GPIO.
-     */
-    PORT_HAL_SetMuxMode(PORTB_BASE, 13u, kPortMuxAsGpio);
-    PORT_HAL_SetMuxMode(PORTA_BASE, 12u, kPortMuxAsGpio);
-    PORT_HAL_SetMuxMode(PORTB_BASE, 0u, kPortMuxAsGpio);
+    if (!spi_enabled) devSSD1331SetupSPI();
 
 
     /*
@@ -150,8 +157,14 @@ devSSD1331init(void)
     struct RGB light_green = {
             0x10, 0x3F, 0x00
     };
+    struct RGB black = {
+            0x00, 0x00, 0x00
+    };
 
     int status = devSSD1331DrawRectangle(0x00, 0x3E, 0x00, 0x5E, light_green, light_green);
+
+    char test_str[] = "Hello there Emily!";
+    devSSD1331print(10,10,test_str,black);
 
     if (status != kWarpStatusOK)     SEGGER_RTT_WriteString(0, "\r\n\tStatus not OK \n");
 
@@ -160,12 +173,9 @@ devSSD1331init(void)
     return 0;
 }
 
-int devSSD1331DrawRectangle (uint16_t first_row, uint16_t last_row, uint16_t first_col, uint16_t last_col,
-                             struct RGB line, struct RGB fill)
+int devSSD1331DrawRectangle (uint8_t first_row, uint8_t last_row, uint8_t first_col, uint8_t last_col,
+                             RGB line, RGB fill)
 {
-    /*
-     *	Any post-initialization drawing commands go here.
-     */
     writeCommand(kSSD1331CommandDRAWRECT);
     writeCommand(first_col);     // First Col
     writeCommand(first_row);     // First Row
@@ -177,6 +187,96 @@ int devSSD1331DrawRectangle (uint16_t first_row, uint16_t last_row, uint16_t fir
     writeCommand(fill.R);     // Fill R
     writeCommand(fill.G);     // Fill G
     int status = writeCommand(fill.B);    // Fill B
+
+    return status;
+}
+
+int devSSD1331DrawLine (uint8_t first_row, uint8_t last_row, uint8_t first_col, uint8_t last_col, RGB line)
+{
+    writeCommand(kSSD1331CommandDRAWLINE);
+    writeCommand(first_col);     // First Col
+    writeCommand(first_row);     // First Row
+    writeCommand(last_col);     // Last Col = 94 = 0x5E
+    writeCommand(last_row);     // Last Row = 62 = 0x3E
+    writeCommand(line.R);     // Line R
+    writeCommand(line.G);     // Line G
+    int status = writeCommand(line.B);     // Line B
+
+    return status;
+}
+
+int devSSD1331DrawChar (uint8_t x, uint8_t y, unsigned char c, RGB color, uint8_t size_x, uint8_t size_y)
+{
+    int status;
+
+    // Ported from https://github.com/adafruit/Adafruit-GFX-Library/blob/master/Adafruit_GFX.cpp#L1134
+    c -= (uint8_t) devSSD1331font->first;
+    GFXglyph *glyph = devSSD1331font->glyph + c;
+    uint16_t    bo  = glyph->bitmapOffset;
+    uint8_t     w   = glyph->width;
+    uint8_t     h   = glyph->height;
+    int8_t      xo  = glyph->xOffset;
+    int8_t      yo  = glyph->yOffset;
+    uint8_t     xx, yy;
+    uint8_t     bits = 0, bit = 0;
+    int16_t     xo16 = 0, yo16 = 0;
+
+    if (size_x > 1 || size_y > 1) {
+        xo16 = xo;
+        yo16 = yo;
+    }
+
+    for (yy = 0; yy < h; ++yy)
+    {
+        for (xx = 0; xx < w; ++xx)
+        {
+            if (!(bit++ & 7))
+            {
+                bits = devSSD1331font->bitmap[bo++];
+            }
+            if (bits & 0x80)
+            {
+                if (size_x == 1 && size_y == 1)
+                {
+                    status = devSSD1331DrawPixel(x + xo + xx, y + yo + yy, color);
+                }
+                else
+                {
+                    status = devSSD1331DrawRectangle(y + (yo16 + yy) * size_y, y + (yo16 + yy) * size_y + size_y,
+                                                     x + (xo16 + xx) * size_x, x + (xo16 + xx) * size_x + size_x,
+                                                     color, color);
+                }
+            }
+            bits <<= 1;
+        }
+    }
+
+    return status;
+}
+
+int devSSD1331print (uint8_t x, uint8_t y, char* c, RGB color)
+{
+    int status = 0;
+
+    for (int i = 0; c[i] != '\0'; ++i)
+    {
+        // Wrap text
+        if (x > (SSD1331_WIDTH - (devSSD1331font->glyph + c[i] - devSSD1331font->first)->width ))
+        {
+            x = 0;
+            y += devSSD1331font->yAdvance;
+        }
+
+        // Check scree-space
+        if (y > (SSD1331_HEIGHT - devSSD1331font->yAdvance))
+        {
+            return 1;
+        }
+
+        status = devSSD1331DrawChar(x, y, c[i], color, 1, 1);
+
+        x += (devSSD1331font->glyph + c[i] - devSSD1331font->first)->xAdvance;
+    }
 
     return status;
 }

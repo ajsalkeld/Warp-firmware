@@ -62,7 +62,7 @@
 #include "gpio_pins.h"
 #include "SEGGER_RTT.h"
 
-
+uint8_t spi_enabled;
 
 #define							kWarpConstantStringI2cFailure		"\rI2C failed, reg 0x%02x, code %d\n"
 #define							kWarpConstantStringErrorInvalidVoltage	"\rInvalid supply voltage [%d] mV!"
@@ -517,6 +517,8 @@ warpEnableSPIpins(void)
 	spiUserConfig.bitsPerSec	= gWarpSpiBaudRateKbps * 1000;
 	SPI_DRV_MasterInit(0 /* SPI master instance */, (spi_master_state_t *)&spiMasterState);
 	SPI_DRV_MasterConfigureBus(0 /* SPI master instance */, (spi_master_user_config_t *)&spiUserConfig, &calculatedBaudRate);
+
+    spi_enabled = 1;
 }
 
 
@@ -546,6 +548,8 @@ warpDisableSPIpins(void)
 	GPIO_DRV_ClearPinOutput(kWarpPinSPI_SCK);
 
 	CLOCK_SYS_DisableSpiClock(0);
+
+    spi_enabled = 0;
 }
 
 

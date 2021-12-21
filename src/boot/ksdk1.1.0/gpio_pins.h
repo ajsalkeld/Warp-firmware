@@ -94,4 +94,7 @@ enum _gpio_pins
 extern gpio_input_pin_user_config_t	inputPins[];
 extern gpio_output_pin_user_config_t	outputPins[];
 extern gpio_input_pin_user_config_t	wakeupPins[];
+
+extern uint8_t spi_enabled;
+
 #endif /* __FSL_GPIO_PINS_H__ */
