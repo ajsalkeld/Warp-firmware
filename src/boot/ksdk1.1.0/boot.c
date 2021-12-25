@@ -111,6 +111,11 @@ uint8_t spi_enabled;
 	volatile WarpI2CDeviceState			deviceINA219State;
 #endif
 
+#if (WARP_BUILD_ENABLE_DEVPASCO2)
+	#include "devPASCO2.h"
+	volatile WarpI2CDeviceState			devicePASCO2State;
+#endif
+
 #if (WARP_BUILD_ENABLE_DEVLPS25H)
 	#include "devLPS25H.h"
 	volatile WarpI2CDeviceState			deviceLPS25HState;
@@ -1625,6 +1630,10 @@ main(void)
 
     #if (WARP_BUILD_ENABLE_DEVINA219)
         initINA219(	    0x40	/* i2cAddress */,		kWarpDefaultSupplyVoltageMillivoltsINA219	);
+    #endif
+
+    #if (WARP_BUILD_ENABLE_DEVPASCO2)
+        initPASCO2(     0x28,   kWarpDefaultSupplyVoltageMillivoltsPASCO2 );
     #endif
 
 	#if (WARP_BUILD_ENABLE_DEVLPS25H)
