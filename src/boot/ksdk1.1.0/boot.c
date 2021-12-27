@@ -116,6 +116,11 @@ uint8_t spi_enabled;
 	volatile WarpI2CDeviceState			devicePASCO2State;
 #endif
 
+#if (WARP_BUILD_ENABLE_DEVBME280)
+	#include "devBME280.h"
+	volatile WarpI2CDeviceState			deviceBME280State;
+#endif
+
 #if (WARP_BUILD_ENABLE_DEVLPS25H)
 	#include "devLPS25H.h"
 	volatile WarpI2CDeviceState			deviceLPS25HState;
@@ -1636,6 +1641,10 @@ main(void)
         initPASCO2(     0x28,   kWarpDefaultSupplyVoltageMillivoltsPASCO2 );
     #endif
 
+    #if (WARP_BUILD_ENABLE_DEVBME280)
+        initBME280(     0x77,   kWarpDefaultSupplyVoltageMillivoltsBME280 );
+    #endif
+
 	#if (WARP_BUILD_ENABLE_DEVLPS25H)
 		initLPS25H(	0x5C	/* i2cAddress */,	&deviceLPS25HState,		kWarpDefaultSupplyVoltageMillivoltsLPS25H	);
 	#endif
@@ -2207,6 +2216,18 @@ main(void)
                     warpPrint("\r\t- 'l' INA219			(0x00--0x05): 1.95V -- 3.6V (compiled out) \n");
                 #endif
 
+                #if (WARP_BUILD_ENABLE_DEVPASCO2)
+                    warpPrint("\r\t- 'l' PASCO2 			(0x00--0x05): 1.95V -- 3.6V\n");
+                #else
+                    warpPrint("\r\t- 'l' PASCO2			(0x00--0x05): 1.95V -- 3.6V (compiled out) \n");
+                #endif
+
+                #if (WARP_BUILD_ENABLE_DEVBME280)
+                    warpPrint("\r\t- 'm' BME280 			(0xF7--0xFE): 1.95V -- 3.6V\n");
+                #else
+                    warpPrint("\r\t- 'm' BME280			(0xF7--0xFE): 1.95V -- 3.6V (compiled out) \n");
+                #endif
+
 				warpPrint("\r\tEnter selection> ");
 				key = warpWaitKey();
 
@@ -2363,6 +2384,24 @@ main(void)
                     {
                         menuTargetSensor = kWarpSensorINA219;
                         menuI2cDevice = &deviceINA219State;
+                        break;
+                    }
+#endif
+
+#if (WARP_BUILD_ENABLE_DEVPASCO2)
+                    case 'k':
+                    {
+                        menuTargetSensor = kWarpSensorPASCO2;
+                        menuI2cDevice = &devicePASCO2State;
+                        break;
+                    }
+#endif
+
+#if (WARP_BUILD_ENABLE_DEVBME280)
+                    case 'm':
+                    {
+                        menuTargetSensor = kWarpSensorBME280;
+                        menuI2cDevice = &deviceBME280State;
                         break;
                     }
 #endif
@@ -2961,6 +3000,14 @@ printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelay
             warpPrint(" INA219 current, ");
         #endif
 
+        #if (WARP_BUILD_ENABLE_DEVPASCO2)
+            warpPrint(" CO2, ");
+        #endif
+
+        #if (WARP_BUILD_ENABLE_DEVBME280)
+            warpPrint(" pressure, temp, humidity, ");
+        #endif
+
 		warpPrint(" RTC->TSR, RTC->TPR, # Config Errors");
 		warpPrint("\n\n");
 	}
@@ -3009,6 +3056,14 @@ printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelay
 
         #if (WARP_BUILD_ENABLE_DEVINA219)
             printSensorDataINA219(hexModeFlag);
+        #endif
+
+        #if (WARP_BUILD_ENABLE_DEVPASCO2)
+            printSensorDataPASCO2(hexModeFlag);
+        #endif
+
+        #if (WARP_BUILD_ENABLE_DEVBME280)
+            printSensorDataBME280(hexModeFlag);
         #endif
 
 		warpPrint(" %12d, %6d, %2u\n", RTC->TSR, RTC->TPR, numberOfConfigErrors);
@@ -3686,6 +3741,65 @@ repeatRegisterReadForDeviceAndAddress(WarpSensorDevice warpSensorDevice, uint8_t
             );
             #else
             warpPrint("\r\n\tINA219 Read Aborted. Device Disabled :(");
+            #endif
+
+            break;
+        }
+
+    case kWarpSensorPASCO2:
+        {
+            /*
+             *	INA219: VDD 1.95--3.6
+             */
+            #if (WARP_BUILD_ENABLE_DEVPASCO2)
+            loopForSensor(	"\r\nPASCO2:\n\r",		/*	tagString			*/
+                              &readSensorRegisterPASCO2,	/*	readSensorRegisterFunction	*/
+                              &devicePASCO2State,		/*	i2cDeviceState			*/
+                              NULL,				/*	spiDeviceState			*/
+                              baseAddress,			/*	baseAddress			*/
+                             //TODO  0x00,				/*	minAddress			*/
+                              0x05,				/*	maxAddress			*/
+                              repetitionsPerAddress,		/*	repetitionsPerAddress		*/
+                              chunkReadsPerAddress,		/*	chunkReadsPerAddress		*/
+                              spinDelay,			/*	spinDelay			*/
+                              autoIncrement,			/*	autoIncrement			*/
+                              sssupplyMillivolts,		/*	sssupplyMillivolts		*/
+                              referenceByte,			/*	referenceByte			*/
+                              adaptiveSssupplyMaxMillivolts,	/*	adaptiveSssupplyMaxMillivolts	*/
+                              chatty				/*	chatty				*/
+            );
+            #else
+            warpPrint("\r\n\tPASCO2 Read Aborted. Device Disabled :(");
+            #endif
+
+            break;
+        }
+
+
+    case kWarpSensorBME280:
+        {
+            /*
+             *	BME280: VDD 1.95--3.6
+             */
+            #if (WARP_BUILD_ENABLE_DEVBME280)
+            loopForSensor(	"\r\nBME280:\n\r",		/*	tagString			*/
+                              &readSensorRegisterBME280,	/*	readSensorRegisterFunction	*/
+                              &deviceBME280State,		/*	i2cDeviceState			*/
+                              NULL,				/*	spiDeviceState			*/
+                              baseAddress,			/*	baseAddress			*/
+                              0xF7,				/*	minAddress			*/
+                              0xFE,				/*	maxAddress			*/
+                              repetitionsPerAddress,		/*	repetitionsPerAddress		*/
+                              chunkReadsPerAddress,		/*	chunkReadsPerAddress		*/
+                              spinDelay,			/*	spinDelay			*/
+                              autoIncrement,			/*	autoIncrement			*/
+                              sssupplyMillivolts,		/*	sssupplyMillivolts		*/
+                              referenceByte,			/*	referenceByte			*/
+                              adaptiveSssupplyMaxMillivolts,	/*	adaptiveSssupplyMaxMillivolts	*/
+                              chatty				/*	chatty				*/
+            );
+            #else
+            warpPrint("\r\n\tBME280 Read Aborted. Device Disabled :(");
             #endif
 
             break;
