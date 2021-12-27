@@ -40,19 +40,23 @@
 // Set a default INA219 config for Warp
 // RST, ---, BRNG, PG1, PG0, BADC4, BADC3, BADC2, BADC1, SADC4, SADC3, SADC2, SADC1, MODE3, MODE2, MODE1
 struct ConfigINA219 {
-    uint16_t reset      : 1;
-    uint16_t brng       : 2;    // Only really 1 bit, but bit14 unused
-    uint16_t pga        : 2;
-    uint16_t badc       : 4;
-    uint16_t sadc       : 4;
+
     uint16_t mode       : 3;
+    uint16_t sadc       : 4;
+    uint16_t badc       : 4;
+    uint16_t pga        : 2;
+    uint16_t brng       : 2;    // Only really 1 bit, but bit14 unused
+    uint16_t reset      : 1;
+
 } ina219_config;
+
+uint16_t ina219_calibration;
 
 uint8_t lastPointer;
 
 void		initINA219(const uint8_t i2cAddress, uint16_t operatingVoltageMillivolts);
 WarpStatus	readSensorRegisterINA219(uint8_t deviceRegister, int numberOfBytes);
 WarpStatus	writeSensorRegisterINA219(uint8_t deviceRegister,
-					uint8_t * payloadBtye);
+					uint8_t * payload);
 WarpStatus  configureSensorINA219(struct ConfigINA219 config);
 void		printSensorDataINA219(bool hexModeFlag);
