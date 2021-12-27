@@ -2202,9 +2202,9 @@ main(void)
                 #endif
 
                 #if (WARP_BUILD_ENABLE_DEVINA219)
-                    warpPrint("\r\t- 'l' INA219 			(0x00--0x05): 1.95V -- 3.6V\n");
+                    warpPrint("\r\t- 'l' INA219 			(0x00--0x05): \n");
                 #else
-                    warpPrint("\r\t- 'l' INA219			(0x00--0x05): 1.95V -- 3.6V (compiled out) \n");
+                    warpPrint("\r\t- 'l' INA219			(0x00--0x05): (compiled out) \n");
                 #endif
 
 				warpPrint("\r\tEnter selection> ");
@@ -2958,7 +2958,7 @@ printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelay
         #endif
 
         #if (WARP_BUILD_ENABLE_DEVINA219)
-            warpPrint(" INA219 current, ");
+            warpPrint(" INA219 shunt V, INA219 Bus V, INA219 power, INA219 current, ");
         #endif
 
 		warpPrint(" RTC->TSR, RTC->TPR, # Config Errors");
