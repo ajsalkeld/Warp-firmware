@@ -40,7 +40,7 @@ void devSSD1331SetupSPI (void)
     PORT_HAL_SetMuxMode(PORTB_BASE, 0u, kPortMuxAsGpio);
 }
 
-static int writeCommand(uint8_t commandByte)
+static int devSSD1331WriteCommand(uint8_t commandByte)
 {
     spi_status_t status;
     if (!spi_enabled) devSSD1331SetupSPI();
@@ -96,58 +96,58 @@ int devSSD1331init(void)
     /*
      *	Initialization sequence, borrowed from https://github.com/adafruit/Adafruit-SSD1331-OLED-Driver-Library-for-Arduino
      */
-    writeCommand(kSSD1331CommandDISPLAYOFF);	// 0xAE
-    writeCommand(kSSD1331CommandSETREMAP);		// 0xA0
-    writeCommand(0x72);				// RGB Color
-    writeCommand(kSSD1331CommandSTARTLINE);		// 0xA1
-    writeCommand(0x0);
-    writeCommand(kSSD1331CommandDISPLAYOFFSET);	// 0xA2
-    writeCommand(0x0);
-    writeCommand(kSSD1331CommandNORMALDISPLAY);	// 0xA4
-    writeCommand(kSSD1331CommandSETMULTIPLEX);	// 0xA8
-    writeCommand(0x3F);				// 0x3F 1/64 duty
-    writeCommand(kSSD1331CommandSETMASTER);		// 0xAD
-    writeCommand(0x8E);
-    writeCommand(kSSD1331CommandPOWERMODE);		// 0xB0
-    writeCommand(0x0B);
-    writeCommand(kSSD1331CommandPRECHARGE);		// 0xB1
-    writeCommand(0x31);
-    writeCommand(kSSD1331CommandCLOCKDIV);		// 0xB3
-    writeCommand(0xF0);				// 7:4 = Oscillator Frequency, 3:0 = CLK Div Ratio (A[3:0]+1 = 1..16)
-    writeCommand(kSSD1331CommandPRECHARGEA);	// 0x8A
-    writeCommand(0x64);
-    writeCommand(kSSD1331CommandPRECHARGEB);	// 0x8B
-    writeCommand(0x78);
-    writeCommand(kSSD1331CommandPRECHARGEA);	// 0x8C
-    writeCommand(0x64);
-    writeCommand(kSSD1331CommandPRECHARGELEVEL);	// 0xBB
-    writeCommand(0x3A);
-    writeCommand(kSSD1331CommandVCOMH);		// 0xBE
-    writeCommand(0x3E);
-    writeCommand(kSSD1331CommandMASTERCURRENT);	// 0x87
-    writeCommand(0x0F); // Give it all it's got!
-    writeCommand(kSSD1331CommandCONTRASTA);		// 0x81
-    writeCommand(0x91);
-    writeCommand(kSSD1331CommandCONTRASTB);		// 0x82
-    writeCommand(0xFF); // Max contrast Green
-    writeCommand(kSSD1331CommandCONTRASTC);		// 0x83
-    writeCommand(0x7D);
-    writeCommand(kSSD1331CommandDISPLAYON);		// Turn on oled panel
+    devSSD1331WriteCommand(kSSD1331CommandDISPLAYOFF);	// 0xAE
+    devSSD1331WriteCommand(kSSD1331CommandSETREMAP);		// 0xA0
+    devSSD1331WriteCommand(0x72);				// RGB Color
+    devSSD1331WriteCommand(kSSD1331CommandSTARTLINE);		// 0xA1
+    devSSD1331WriteCommand(0x0);
+    devSSD1331WriteCommand(kSSD1331CommandDISPLAYOFFSET);	// 0xA2
+    devSSD1331WriteCommand(0x0);
+    devSSD1331WriteCommand(kSSD1331CommandNORMALDISPLAY);	// 0xA4
+    devSSD1331WriteCommand(kSSD1331CommandSETMULTIPLEX);	// 0xA8
+    devSSD1331WriteCommand(0x3F);				// 0x3F 1/64 duty
+    devSSD1331WriteCommand(kSSD1331CommandSETMASTER);		// 0xAD
+    devSSD1331WriteCommand(0x8E);
+    devSSD1331WriteCommand(kSSD1331CommandPOWERMODE);		// 0xB0
+    devSSD1331WriteCommand(0x0B);
+    devSSD1331WriteCommand(kSSD1331CommandPRECHARGE);		// 0xB1
+    devSSD1331WriteCommand(0x31);
+    devSSD1331WriteCommand(kSSD1331CommandCLOCKDIV);		// 0xB3
+    devSSD1331WriteCommand(0xF0);				// 7:4 = Oscillator Frequency, 3:0 = CLK Div Ratio (A[3:0]+1 = 1..16)
+    devSSD1331WriteCommand(kSSD1331CommandPRECHARGEA);	// 0x8A
+    devSSD1331WriteCommand(0x64);
+    devSSD1331WriteCommand(kSSD1331CommandPRECHARGEB);	// 0x8B
+    devSSD1331WriteCommand(0x78);
+    devSSD1331WriteCommand(kSSD1331CommandPRECHARGEA);	// 0x8C
+    devSSD1331WriteCommand(0x64);
+    devSSD1331WriteCommand(kSSD1331CommandPRECHARGELEVEL);	// 0xBB
+    devSSD1331WriteCommand(0x3A);
+    devSSD1331WriteCommand(kSSD1331CommandVCOMH);		// 0xBE
+    devSSD1331WriteCommand(0x3E);
+    devSSD1331WriteCommand(kSSD1331CommandMASTERCURRENT);	// 0x87
+    devSSD1331WriteCommand(0x0F); // Give it all it's got!
+    devSSD1331WriteCommand(kSSD1331CommandCONTRASTA);		// 0x81
+    devSSD1331WriteCommand(0x91);
+    devSSD1331WriteCommand(kSSD1331CommandCONTRASTB);		// 0x82
+    devSSD1331WriteCommand(0xFF); // Max contrast Green
+    devSSD1331WriteCommand(kSSD1331CommandCONTRASTC);		// 0x83
+    devSSD1331WriteCommand(0x7D);
+    devSSD1331WriteCommand(kSSD1331CommandDISPLAYON);		// Turn on oled panel
 
     /*
      *	To use fill commands, you will have to issue a command to the display to enable them. See the manual.
      */
-    writeCommand(kSSD1331CommandFILL);
-    writeCommand(0x01);
+    devSSD1331WriteCommand(kSSD1331CommandFILL);
+    devSSD1331WriteCommand(0x01);
 
     /*
      *	Clear Screen
      */
-    writeCommand(kSSD1331CommandCLEAR);
-    writeCommand(0x00);
-    writeCommand(0x00);
-    writeCommand(0x5F);
-    writeCommand(0x3F);
+    devSSD1331WriteCommand(kSSD1331CommandCLEAR);
+    devSSD1331WriteCommand(0x00);
+    devSSD1331WriteCommand(0x00);
+    devSSD1331WriteCommand(0x5F);
+    devSSD1331WriteCommand(0x3F);
 
 
 
@@ -176,31 +176,31 @@ int devSSD1331init(void)
 int devSSD1331DrawRectangle (uint8_t first_row, uint8_t last_row, uint8_t first_col, uint8_t last_col,
                              RGB line, RGB fill)
 {
-    writeCommand(kSSD1331CommandDRAWRECT);
-    writeCommand(first_col);     // First Col
-    writeCommand(first_row);     // First Row
-    writeCommand(last_col);     // Last Col = 94 = 0x5E
-    writeCommand(last_row);     // Last Row = 62 = 0x3E
-    writeCommand(line.R);     // Line R
-    writeCommand(line.G);     // Line G
-    writeCommand(line.B);     // Line B
-    writeCommand(fill.R);     // Fill R
-    writeCommand(fill.G);     // Fill G
-    int status = writeCommand(fill.B);    // Fill B
+    devSSD1331WriteCommand(kSSD1331CommandDRAWRECT);
+    devSSD1331WriteCommand(first_col);     // First Col
+    devSSD1331WriteCommand(first_row);     // First Row
+    devSSD1331WriteCommand(last_col);     // Last Col = 94 = 0x5E
+    devSSD1331WriteCommand(last_row);     // Last Row = 62 = 0x3E
+    devSSD1331WriteCommand(line.R);     // Line R
+    devSSD1331WriteCommand(line.G);     // Line G
+    devSSD1331WriteCommand(line.B);     // Line B
+    devSSD1331WriteCommand(fill.R);     // Fill R
+    devSSD1331WriteCommand(fill.G);     // Fill G
+    int status = devSSD1331WriteCommand(fill.B);    // Fill B
 
     return status;
 }
 
 int devSSD1331DrawLine (uint8_t first_row, uint8_t last_row, uint8_t first_col, uint8_t last_col, RGB line)
 {
-    writeCommand(kSSD1331CommandDRAWLINE);
-    writeCommand(first_col);     // First Col
-    writeCommand(first_row);     // First Row
-    writeCommand(last_col);     // Last Col = 94 = 0x5E
-    writeCommand(last_row);     // Last Row = 62 = 0x3E
-    writeCommand(line.R);     // Line R
-    writeCommand(line.G);     // Line G
-    int status = writeCommand(line.B);     // Line B
+    devSSD1331WriteCommand(kSSD1331CommandDRAWLINE);
+    devSSD1331WriteCommand(first_col);     // First Col
+    devSSD1331WriteCommand(first_row);     // First Row
+    devSSD1331WriteCommand(last_col);     // Last Col = 94 = 0x5E
+    devSSD1331WriteCommand(last_row);     // Last Row = 62 = 0x3E
+    devSSD1331WriteCommand(line.R);     // Line R
+    devSSD1331WriteCommand(line.G);     // Line G
+    int status = devSSD1331WriteCommand(line.B);     // Line B
 
     return status;
 }
