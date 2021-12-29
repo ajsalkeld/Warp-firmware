@@ -154,17 +154,11 @@ int devSSD1331init(void)
     /*
      *	Any post-initialization drawing commands go here.
      */
-    struct RGB light_green = {
-            0x10, 0x3F, 0x00
-    };
-    struct RGB black = {
-            0x00, 0x00, 0x00
-    };
 
-    int status = devSSD1331DrawRectangle(0x00, 0x3E, 0x00, 0x5E, light_green, light_green);
+    int status = devSSD1331DrawRectangle(0x00, 0x3E, 0x00, 0x5E, black, black);
 
-    //char test_str[] = "Hello World!";
-    //devSSD1331print(10,10,test_str,black);
+    char test_str[] = "Hello World!";
+    devSSD1331print(10,14,test_str,white);
 
     if (status != kWarpStatusOK)     SEGGER_RTT_WriteString(0, "\r\n\tStatus not OK \n");
 

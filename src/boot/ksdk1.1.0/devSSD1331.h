@@ -258,6 +258,18 @@ const GFXfont FreeSans8pt7b = {
 
 // Approx. 1574 bytes
 
+struct RGB light_green = {
+        0x10, 0x3F, 0x00
+};
+
+struct RGB black = {
+        0x00, 0x00, 0x00
+};
+
+struct RGB white = {
+        0xFF, 0xFF, 0xFF
+};
+
 extern GFXfont * devSSD1331font;
 
 int	devSSD1331init(void);
