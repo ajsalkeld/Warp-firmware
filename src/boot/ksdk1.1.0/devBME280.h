@@ -42,9 +42,10 @@
 
 // I2C Comms
 WarpStatus readSensorRegisterBME280(uint8_t registerPointer, int numberOfBytes);
-WarpStatus writeSensorRegisterBME280(uint8_t registerPointer, uint8_t * payload);
+WarpStatus writeSensorRegisterBME280(uint8_t registerPointer, uint8_t payload);
 void initBME280(const uint8_t i2cAddress, uint16_t operatingVoltageMillivolts);
 void printSensorDataBME280(bool hexModeFlag);
+#define triggerBME280(void) writeSensorRegisterBME280(0xF4, 0b00100101)
 
 // Conversions
 

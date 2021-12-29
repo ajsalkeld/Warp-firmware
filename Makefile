@@ -77,7 +77,7 @@ glaux:
 	@echo "\n\nNow, run\n\n\tmake load-glaux\n\n"
 
 load-warp:
-	$(JLINKPATH) -device MKL03Z32XXX4 -if SWD -speed 10000 -CommanderScript tools/scripts/warp.jlink.commands
+	$(JLINKPATH) -NoGui 1 -device MKL03Z32XXX4 -if SWD -speed 10000 -CommanderScript tools/scripts/warp.jlink.commands
 
 load-glaux:
 	$(JLINKPATH) -device MKL03Z32XXX4 -if SWD -speed 10000 -CommanderScript tools/scripts/glaux.jlink.commands

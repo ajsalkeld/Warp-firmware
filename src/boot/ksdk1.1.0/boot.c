@@ -3005,7 +3005,7 @@ printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelay
         #endif
 
         #if (WARP_BUILD_ENABLE_DEVBME280)
-            warpPrint(" pressure, temp, humidity, ");
+            warpPrint(" pressure, temp, humidity, BME280 status, ");
         #endif
 
 		warpPrint(" RTC->TSR, RTC->TPR, # Config Errors");

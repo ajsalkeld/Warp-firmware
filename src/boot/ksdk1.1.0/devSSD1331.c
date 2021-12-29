@@ -163,8 +163,8 @@ int devSSD1331init(void)
 
     int status = devSSD1331DrawRectangle(0x00, 0x3E, 0x00, 0x5E, light_green, light_green);
 
-    char test_str[] = "Hello there Emily!";
-    devSSD1331print(10,10,test_str,black);
+    //char test_str[] = "Hello World!";
+    //devSSD1331print(10,10,test_str,black);
 
     if (status != kWarpStatusOK)     SEGGER_RTT_WriteString(0, "\r\n\tStatus not OK \n");
 

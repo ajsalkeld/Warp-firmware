@@ -71,6 +71,8 @@ typedef enum
 	kWarpSensorADXL362,
 	kWarpSensorMMA8451Q,
 	kWarpSensorINA219,
+	kWarpSensorPASCO2,
+	kWarpSensorBME280,
 	kWarpSensorBME680,
 	kWarpSensorBMX055accel,
 	kWarpSensorBMX055gyro,

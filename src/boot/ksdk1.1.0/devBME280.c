@@ -69,41 +69,61 @@ void initBME280(const uint8_t i2cAddress, uint16_t operatingVoltageMillivolts)
     deviceBME280State.i2cAddress			= i2cAddress;
     deviceBME280State.operatingVoltageMillivolts	= operatingVoltageMillivolts;
 
-    // TODO: Set config to forced mode
+    // Reset
+    writeSensorRegisterBME280(0xE0, 0xB6);
 
-    WarpStatus i2cReadStatus = readSensorRegisterBME280(0x88, 25 /* numberOfBytes */);
+    // config: Set filter off
+    writeSensorRegisterBME280(0xF5, 0b0000000);
+
+    // ctrl_hum: Set humidity oversampling to x1
+    writeSensorRegisterBME280(0xF2, 0b00000001);
+
+    // ctrl_meas: Set temp and pressure oversamp to x1; mode to sleep.
+    WarpStatus ctrl_meas_status = writeSensorRegisterBME280(0xF4, 0b00100101);
+    warpPrint("\r\n\t Write status %d", ctrl_meas_status);
+
+
+    readSensorRegisterBME280(0xD0, 1);
+    uint8_t chip_id = (uint8_t) deviceBME280State.i2cBuffer[0];
+    warpPrint("\r\n\t ctrl_meas 0x%X", chip_id);
+
+    WarpStatus read_status = readSensorRegisterBME280(0x88, 25 /* numberOfBytes */);
+    warpPrint("\r\n\t Read status %d", read_status);
 
     // dig_T1 ... 3
-    dig_T1 = (uint16_t) &deviceBME280State.i2cBuffer[0];
-    dig_T2 = (int16_t)  &deviceBME280State.i2cBuffer[2];
-    dig_T3 = (int16_t)  &deviceBME280State.i2cBuffer[4];
+    dig_T1 = ( deviceBME280State.i2cBuffer[0] << 8 ) | deviceBME280State.i2cBuffer[1];
+    dig_T2 = ( deviceBME280State.i2cBuffer[2] << 8 ) | deviceBME280State.i2cBuffer[3];
+    dig_T3 = ( deviceBME280State.i2cBuffer[4] << 8 ) | deviceBME280State.i2cBuffer[5];
 
     // dig_P1 ... 9
-    dig_P1 = (uint16_t) &deviceBME280State.i2cBuffer[6];
-    dig_P2 = (int16_t)  &deviceBME280State.i2cBuffer[8];
-    dig_P3 = (int16_t)  &deviceBME280State.i2cBuffer[10];
-    dig_P4 = (int16_t)  &deviceBME280State.i2cBuffer[12];
-    dig_P5 = (int16_t)  &deviceBME280State.i2cBuffer[14];
-    dig_P6 = (int16_t)  &deviceBME280State.i2cBuffer[16];
-    dig_P7 = (int16_t)  &deviceBME280State.i2cBuffer[18];
-    dig_P8 = (int16_t)  &deviceBME280State.i2cBuffer[20];
-    dig_P9 = (int16_t)  &deviceBME280State.i2cBuffer[22];
+    dig_P1 = (uint16_t) ( deviceBME280State.i2cBuffer[6]  << 8 ) | deviceBME280State.i2cBuffer[7];
+    dig_P2 = (int16_t)  ( deviceBME280State.i2cBuffer[8]  << 8 ) | deviceBME280State.i2cBuffer[9];
+    dig_P3 = (int16_t)  ( deviceBME280State.i2cBuffer[10] << 8 ) | deviceBME280State.i2cBuffer[11];
+    dig_P4 = (int16_t)  ( deviceBME280State.i2cBuffer[12] << 8 ) | deviceBME280State.i2cBuffer[13];
+    dig_P5 = (int16_t)  ( deviceBME280State.i2cBuffer[14] << 8 ) | deviceBME280State.i2cBuffer[15];
+    dig_P6 = (int16_t)  ( deviceBME280State.i2cBuffer[16] << 8 ) | deviceBME280State.i2cBuffer[17];
+    dig_P7 = (int16_t)  ( deviceBME280State.i2cBuffer[18] << 8 ) | deviceBME280State.i2cBuffer[19];
+    dig_P8 = (int16_t)  ( deviceBME280State.i2cBuffer[20] << 8 ) | deviceBME280State.i2cBuffer[21];
+    dig_P9 = (int16_t)  ( deviceBME280State.i2cBuffer[22] << 8 ) | deviceBME280State.i2cBuffer[23];
 
     // dig_H1 ... 6
-    dig_H1 = (uint8_t)  &deviceBME280State.i2cBuffer[24];
+    dig_H1 = (uint8_t)  deviceBME280State.i2cBuffer[24];
 
-    i2cReadStatus = readSensorRegisterBME280(0xE1, 8 /* numberOfBytes */);
 
-    dig_H2 = (int16_t)  &deviceBME280State.i2cBuffer[0];
-    dig_H3 = (uint8_t)  &deviceBME280State.i2cBuffer[2];
-    dig_H4 = (int16_t)  &deviceBME280State.i2cBuffer[3];
-    dig_H5 = (int16_t)  &deviceBME280State.i2cBuffer[5];
-    dig_H6 = (int8_t)   &deviceBME280State.i2cBuffer[7];
+    read_status = readSensorRegisterBME280(0xE1, 7);
+    warpPrint("\r\n\t Read status %d", read_status);
+
+    dig_H2 = (int16_t)  deviceBME280State.i2cBuffer[0];
+    warpPrint("\r\n\t dig_H2 %d", dig_H2);
+    dig_H3 = (uint8_t)  deviceBME280State.i2cBuffer[2];
+    dig_H4 = (int16_t)  ( ( (uint8_t) deviceBME280State.i2cBuffer[3] ) << 4  || ( (uint8_t) deviceBME280State.i2cBuffer[4] & 0b00001111 ) );
+    dig_H5 = (int16_t)  ( ( ( (uint8_t) deviceBME280State.i2cBuffer[4] & 0b11110000 ) >> 4 ) || ( (uint8_t) deviceBME280State.i2cBuffer[5] ) << 4  );
+    dig_H6 = (int8_t)   deviceBME280State.i2cBuffer[6];
 
     return;
 }
 
-WarpStatus writeSensorRegisterBME280(uint8_t registerPointer, uint8_t * payload)
+WarpStatus writeSensorRegisterBME280(uint8_t registerPointer, uint8_t payload)
 {
     uint8_t		payloadByte[2], commandByte[1];
     i2c_status_t	status;
@@ -130,8 +150,7 @@ WarpStatus writeSensorRegisterBME280(uint8_t registerPointer, uint8_t * payload)
 
     warpScaleSupplyVoltage(deviceBME280State.operatingVoltageMillivolts);
     commandByte[0] = registerPointer;
-    payloadByte[0] = payload[0];
-    payloadByte[1] = payload[1];
+    payloadByte[0] = payload;
     warpEnableI2Cpins();
 
     status = I2C_DRV_MasterSendDataBlocking(
@@ -140,7 +159,7 @@ WarpStatus writeSensorRegisterBME280(uint8_t registerPointer, uint8_t * payload)
             commandByte,
             1,
             payloadByte,
-            2,
+            1,
             gWarpI2cTimeoutMilliseconds);
 
     if (status != kStatus_I2C_Success)
@@ -151,13 +170,15 @@ WarpStatus writeSensorRegisterBME280(uint8_t registerPointer, uint8_t * payload)
     return kWarpStatusOK;
 }
 
-WarpStatus readSensorRegisterBME280(uint8_t registerPointer, int numberOfBytes)
+WarpStatus readSensorRegisterBME280(uint8_t deviceRegister, int numberOfBytes)
 {
+    uint8_t		cmdBuf[1] = {0xFF};
     i2c_status_t	status;
 
 
     USED(numberOfBytes);
-    switch (registerPointer)
+
+    switch (deviceRegister)
     {
         case 0xF2: /* ctrl_hum */ case 0xF4: /* ctrl_meas */ case 0xF5: /* config */
         case 0xFE: /* hum_lsb */ case 0xFD: /* hum_msb */ case 0xFC: /* temp_xlsb */
@@ -181,29 +202,15 @@ WarpStatus readSensorRegisterBME280(uint8_t registerPointer, int numberOfBytes)
                     .baudRate_kbps = gWarpI2cBaudRateKbps
             };
 
+    cmdBuf[0] = deviceRegister;
+
     warpScaleSupplyVoltage(deviceBME280State.operatingVoltageMillivolts);
     warpEnableI2Cpins();
-
-    // First send write command with register
-    status = I2C_DRV_MasterSendDataBlocking(
-            0 /* I2C instance */,
-            &slave,
-            &registerPointer,
-            1,
-            NULL, // No payload to send
-            0,
-            gWarpI2cTimeoutMilliseconds);
-
-    if (status != kStatus_I2C_Success)
-    {
-        return kWarpStatusDeviceCommunicationFailed;
-    }
-
     status = I2C_DRV_MasterReceiveDataBlocking(
             0 /* I2C peripheral instance */,
             &slave,
-            NULL, // No register pointer, just receive.
-            0,
+            cmdBuf,
+            1,
             (uint8_t *)deviceBME280State.i2cBuffer,
             numberOfBytes,
             gWarpI2cTimeoutMilliseconds);
@@ -222,14 +229,24 @@ void printSensorDataBME280(bool hexModeFlag)
 
     warpScaleSupplyVoltage(deviceBME280State.operatingVoltageMillivolts);
 
-    i2cReadStatus = readSensorRegisterBME280(0xF7, 8 /* numberOfBytes */);
-    // Received press. MSB, LSB, XLSB; temp MSB, LSB, XLSB; hum. MSB, LSB
+    // Trigger recording
+    triggerBME280();
 
-    int32_t receivedPressure = ( (int32_t) &deviceBME280State.i2cBuffer[0] ) >> 12;
+    i2cReadStatus = readSensorRegisterBME280(0xF3, 1);
+    uint8_t status = deviceBME280State.i2cBuffer[0];
 
-    int32_t receivedTemp = ( (int32_t) &deviceBME280State.i2cBuffer[3] ) >> 12;
+    // Now read values
+    i2cReadStatus = readSensorRegisterBME280(0xF7, 8);
 
-    int32_t receivedHum = (int32_t) ( (uint16_t) &deviceBME280State.i2cBuffer[6] );
+    // Received press. MSB, LSB, XLSB; temp MSB, LSB, XLSB; hum. MSB, LSB. Positive but store signed.
+
+    int32_t receivedPressure = ( deviceBME280State.i2cBuffer[0] << 12 ) | ( deviceBME280State.i2cBuffer[1] << 4 )
+                                | ( (deviceBME280State.i2cBuffer[2] & 0xF0) >> 4 );
+
+    int32_t receivedTemp = ( deviceBME280State.i2cBuffer[3] << 12 ) | ( deviceBME280State.i2cBuffer[4] << 4 )
+                                | ( (deviceBME280State.i2cBuffer[5] & 0xF0) >> 4 );
+
+    int32_t receivedHum = ( deviceBME280State.i2cBuffer[6] << 8 ) | ( deviceBME280State.i2cBuffer[7] );
 
     if (i2cReadStatus != kWarpStatusOK)
     {
@@ -239,12 +256,12 @@ void printSensorDataBME280(bool hexModeFlag)
     {
         if (hexModeFlag)
         {
-            warpPrint(" 0x%08x, 0x%08x, 0x%04x,", receivedPressure, receivedTemp, receivedHum);
+            warpPrint(" 0x%08x, 0x%08x, 0x%04x, 0x%04x", receivedPressure, receivedTemp, receivedHum, status);
         }
         else
         {
-            warpPrint(" %d, %d, %d,", BME280_compensate_P_int64(receivedPressure), BME280_compensate_T_int32(receivedTemp),
-                      BME280_compensate_H_int32(receivedHum));
+            warpPrint(" %d, %d, %d, 0x%04x", BME280_compensate_P_int64(receivedPressure) / 256, BME280_compensate_T_int32(receivedTemp),
+                      BME280_compensate_H_int32(receivedHum) / 1024, status);
         }
     }
 }
