@@ -35,7 +35,6 @@
 	POSSIBILITY OF SUCH DAMAGE.
 */
 #include <stdlib.h>
-#include <stdio.h>
 
 /*
  *	config.h needs to come first
@@ -106,10 +105,6 @@ initINA219(const uint8_t i2cAddress, uint16_t operatingVoltageMillivolts)
     // PowerLSB = 20 * CurrentLSB = 0.0002 (units of 200 uW)
 
     // Thus, to reach mA and mW, divide current by 100, divide power by 5.
-
-    char msg[50];
-    sprintf(msg, "\r\n\tsizeof(ina219_config) -> %u, ina219_config -> %u\n", sizeof(ina219_config), ina219_config);
-    SEGGER_RTT_WriteString(0, msg);
 
     configureSensorINA219(ina219_config);
 
