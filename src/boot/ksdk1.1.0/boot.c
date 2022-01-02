@@ -2217,15 +2217,15 @@ main(void)
                 #endif
 
                 #if (WARP_BUILD_ENABLE_DEVPASCO2)
-                    warpPrint("\r\t- 'l' PASCO2 			(0x00--0x05): 1.95V -- 3.6V\n");
+                    warpPrint("\r\t- 'm' PASCO2 			(0x05--0x06)\n");
                 #else
-                    warpPrint("\r\t- 'l' PASCO2			(0x00--0x05): 1.95V -- 3.6V (compiled out) \n");
+                    warpPrint("\r\t- 'm' PASCO2			(0x05--0x06) (compiled out) \n");
                 #endif
 
                 #if (WARP_BUILD_ENABLE_DEVBME280)
-                    warpPrint("\r\t- 'm' BME280 			(0xF7--0xFE): 1.95V -- 3.6V\n");
+                    warpPrint("\r\t- 'n' BME280 			(0xF7--0xFE)\n");
                 #else
-                    warpPrint("\r\t- 'm' BME280			(0xF7--0xFE): 1.95V -- 3.6V (compiled out) \n");
+                    warpPrint("\r\t- 'n' BME280			(0xF7--0xFE): 1.95V -- 3.6V (compiled out) \n");
                 #endif
 
 				warpPrint("\r\tEnter selection> ");
@@ -2389,7 +2389,7 @@ main(void)
 #endif
 
 #if (WARP_BUILD_ENABLE_DEVPASCO2)
-                    case 'k':
+                    case 'm':
                     {
                         menuTargetSensor = kWarpSensorPASCO2;
                         menuI2cDevice = &devicePASCO2State;
@@ -2398,7 +2398,7 @@ main(void)
 #endif
 
 #if (WARP_BUILD_ENABLE_DEVBME280)
-                    case 'm':
+                    case 'n':
                     {
                         menuTargetSensor = kWarpSensorBME280;
                         menuI2cDevice = &deviceBME280State;
@@ -3001,7 +3001,7 @@ printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelay
         #endif
 
         #if (WARP_BUILD_ENABLE_DEVPASCO2)
-            warpPrint(" CO2, ");
+            warpPrint(" CO2, CO2 Status, ");
         #endif
 
         #if (WARP_BUILD_ENABLE_DEVBME280)
@@ -3757,8 +3757,8 @@ repeatRegisterReadForDeviceAndAddress(WarpSensorDevice warpSensorDevice, uint8_t
                               &devicePASCO2State,		/*	i2cDeviceState			*/
                               NULL,				/*	spiDeviceState			*/
                               baseAddress,			/*	baseAddress			*/
-                             //TODO  0x00,				/*	minAddress			*/
-                              0x05,				/*	maxAddress			*/
+                              0x05,				/*	minAddress			*/
+                              0x06,				/*	maxAddress			*/
                               repetitionsPerAddress,		/*	repetitionsPerAddress		*/
                               chunkReadsPerAddress,		/*	chunkReadsPerAddress		*/
                               spinDelay,			/*	spinDelay			*/

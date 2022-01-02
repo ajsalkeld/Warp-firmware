@@ -38,13 +38,9 @@
 
 #include <stdint.h>
 
-uint8_t lastPointer;
-
 void		initPASCO2(const uint8_t i2cAddress, uint16_t operatingVoltageMillivolts);
 WarpStatus	readSensorRegisterPASCO2(uint8_t deviceRegister, int numberOfBytes);
-WarpStatus	writeSensorRegisterPASCO2(uint8_t deviceRegister,
-                                        uint8_t * payloadBtye);
-WarpStatus  configureSensorPASCO2(struct ConfigPASCO2 config);
+WarpStatus writeSensorRegisterPASCO2(uint8_t registerPointer, uint8_t payload);
 void		printSensorDataPASCO2(bool hexModeFlag);
 #define WARP_FIRMWARE_DEVPASCO2_H
 

@@ -69,17 +69,37 @@ void initPASCO2(const uint8_t i2cAddress, uint16_t operatingVoltageMillivolts)
     devicePASCO2State.i2cAddress			= i2cAddress;
     devicePASCO2State.operatingVoltageMillivolts	= operatingVoltageMillivolts;
 
+    // Clear sticky bits
+    writeSensorRegisterPASCO2(0x01, 0b00000111);
+
+    // Check status
+    readSensorRegisterPASCO2(0x01, 1);
+    warpPrint("\r\n\t PASCO2 status: 0x%02x", devicePASCO2State.i2cBuffer[0]);
+
+    // Put to idle mode
+    writeSensorRegisterPASCO2(0x04, 0x00);
+
+    // Delay 400ms
+    OSA_TimeDelay(400);
+
+    // Set pressure
+    writeSensorRegisterPASCO2(0x0B, 0x03);
+    writeSensorRegisterPASCO2(0x0C, 0xF5);
+
     return;
 }
 
-WarpStatus writeSensorRegisterPASCO2(uint8_t registerPointer, uint8_t * payload)
+WarpStatus writeSensorRegisterPASCO2(uint8_t registerPointer, uint8_t payload)
 {
-    uint8_t		payloadByte[2], commandByte[1];
+    uint8_t		payloadByte[1], commandByte[1];
     i2c_status_t	status;
 
     switch (registerPointer)
     {
-        case 0x00: /* Config */ case 0x05: /* Calibration */
+        case 0x01: /* Status */ case 0x02 ... 0x03: /* Measure rate */ case 0x04: /* Measure config */
+        case 0x07: /* Measurements Status */ case 0x08: /* Interrupt Pin config */
+        case 0x09 ... 0x0A: /* Alarm Thresh. */ case 0x0B ... 0x0C: /* Pressure compensation */
+        case 0x0D ... 0x0E: /* Baseline reference */ case 0x0F: /* Scratch pad */ case 0x10: /* Soft reset */
         {
             /* OK */
             break;
@@ -99,8 +119,7 @@ WarpStatus writeSensorRegisterPASCO2(uint8_t registerPointer, uint8_t * payload)
 
     warpScaleSupplyVoltage(devicePASCO2State.operatingVoltageMillivolts);
     commandByte[0] = registerPointer;
-    payloadByte[0] = payload[0];
-    payloadByte[1] = payload[1];
+    payloadByte[0] = payload;
     warpEnableI2Cpins();
 
     status = I2C_DRV_MasterSendDataBlocking(
@@ -109,11 +128,8 @@ WarpStatus writeSensorRegisterPASCO2(uint8_t registerPointer, uint8_t * payload)
             commandByte,
             1,
             payloadByte,
-            2,
+            1,
             gWarpI2cTimeoutMilliseconds);
-
-    // Update last pointer
-    lastPointer = registerPointer;
 
     if (status != kStatus_I2C_Success)
     {
@@ -131,8 +147,12 @@ WarpStatus readSensorRegisterPASCO2(uint8_t registerPointer, int numberOfBytes)
     USED(numberOfBytes);
     switch (registerPointer)
     {
-        case 0x00: /* Config */ case 0x01: /* Shunt V */ case 0x02: /* Bus V */ case 0x03: /* Power */
-        case 0x04: /* Current */ case 0x05: /* Calibration */
+        case 0x00: /* Product ID */
+        case 0x01: /* Status */ case 0x02 ... 0x03: /* Measure rate */ case 0x04: /* Measure config */
+        case 0x05 ... 0x06: /* CO2 PPM */
+        case 0x07: /* Measurements Status */ case 0x08: /* Interrupt Pin config */
+        case 0x09 ... 0x0A: /* Alarm Thresh. */ case 0x0B ... 0x0C: /* Pressure compensation */
+        case 0x0D ... 0x0E: /* Baseline reference */ case 0x0F: /* Scratch pad */
         {
             /* OK */
             break;
@@ -157,7 +177,7 @@ WarpStatus readSensorRegisterPASCO2(uint8_t registerPointer, int numberOfBytes)
             0 /* I2C peripheral instance */,
             &slave,
             &registerPointer,
-            0,
+            1,
             (uint8_t *)devicePASCO2State.i2cBuffer,
             numberOfBytes,
             gWarpI2cTimeoutMilliseconds);
@@ -178,23 +198,37 @@ void printSensorDataPASCO2(bool hexModeFlag)
 
     warpScaleSupplyVoltage(devicePASCO2State.operatingVoltageMillivolts);
 
-    i2cReadStatus = readSensorRegisterPASCO2(0x05 /* Current register */, 2 /* numberOfBytes */);
+    writeSensorRegisterPASCO2(0x01, 0b00000111);
+
+    // TODO: Set pressure from BME280
+
+    // Single measurement
+    writeSensorRegisterPASCO2(0x04, 0x01);
+    OSA_TimeDelay(1000);
+
+    // Get CO2 PPM
+    i2cReadStatus = readSensorRegisterPASCO2(0x05, 2);
+
     // Receive MSB,LSB
-    readSensorRegisterValueCombined = (uint16_t) &devicePASCO2State.i2cBuffer[0];
+    readSensorRegisterValueCombined = (uint16_t) ( ( devicePASCO2State.i2cBuffer[0] << 8 ) | devicePASCO2State.i2cBuffer[1] );
+
+    // Get status
+    i2cReadStatus = readSensorRegisterPASCO2(0x01, 1);
+    uint8_t CO2Status = devicePASCO2State.i2cBuffer[0];
 
     if (i2cReadStatus != kWarpStatusOK)
     {
-        warpPrint(" ----,");
+        warpPrint(" ----, ----, ");
     }
     else
     {
         if (hexModeFlag)
         {
-            warpPrint(" 0x%04x,", readSensorRegisterValueCombined);
+            warpPrint(" 0x%04x, 0x%02x, ", readSensorRegisterValueCombined, CO2Status);
         }
         else
         {
-            warpPrint(" %d,", readSensorRegisterValueCombined);
+            warpPrint(" %d, %d, ", readSensorRegisterValueCombined, CO2Status);
         }
     }
 }
