@@ -89,6 +89,9 @@ enum _gpio_pins
     kSSD1331PinDC		= GPIO_MAKE_PIN(HW_GPIOA, 12),
     kSSD1331PinRST		= GPIO_MAKE_PIN(HW_GPIOB, 0),
     #endif
+    #if (WARP_BUILD_ENABLE_DEVSDSPI)
+    kSDSPIPinCSn = GPIO_MAKE_PIN(HW_GPIOB, 1),
+    #endif
 };
 
 extern gpio_input_pin_user_config_t	inputPins[];

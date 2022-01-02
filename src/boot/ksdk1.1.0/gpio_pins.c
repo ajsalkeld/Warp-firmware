@@ -165,6 +165,14 @@ gpio_output_pin_user_config_t	outputPins[] = {
 			.config.driveStrength = kPortLowDriveStrength,
 		},
 		*/
+    #if (WARP_BUILD_ENABLE_DEVSDSPI)
+        {
+			.pinName = kSDSPIPinCSn,
+			.config.outputLogic = 1,
+			.config.slewRate = kPortSlowSlewRate,
+			.config.driveStrength = kPortLowDriveStrength,
+		},
+    #endif
 	#else
 		{
 			.pinName = kGlauxPinLED,
