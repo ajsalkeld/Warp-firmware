@@ -91,34 +91,34 @@ void initBME280(const uint8_t i2cAddress, uint16_t operatingVoltageMillivolts)
     warpPrint("\r\n\t Read status %d", read_status);
 
     // dig_T1 ... 3
-    dig_T1 = ( deviceBME280State.i2cBuffer[0] << 8 ) | deviceBME280State.i2cBuffer[1];
-    dig_T2 = ( deviceBME280State.i2cBuffer[2] << 8 ) | deviceBME280State.i2cBuffer[3];
-    dig_T3 = ( deviceBME280State.i2cBuffer[4] << 8 ) | deviceBME280State.i2cBuffer[5];
+    devBME280_calib_data.dig_T1 = ( deviceBME280State.i2cBuffer[0] << 8 ) | deviceBME280State.i2cBuffer[1];
+    devBME280_calib_data.dig_T2 = ( deviceBME280State.i2cBuffer[2] << 8 ) | deviceBME280State.i2cBuffer[3];
+    devBME280_calib_data.dig_T3 = ( deviceBME280State.i2cBuffer[4] << 8 ) | deviceBME280State.i2cBuffer[5];
 
     // dig_P1 ... 9
-    dig_P1 = (uint16_t) ( deviceBME280State.i2cBuffer[6]  << 8 ) | deviceBME280State.i2cBuffer[7];
-    dig_P2 = (int16_t)  ( deviceBME280State.i2cBuffer[8]  << 8 ) | deviceBME280State.i2cBuffer[9];
-    dig_P3 = (int16_t)  ( deviceBME280State.i2cBuffer[10] << 8 ) | deviceBME280State.i2cBuffer[11];
-    dig_P4 = (int16_t)  ( deviceBME280State.i2cBuffer[12] << 8 ) | deviceBME280State.i2cBuffer[13];
-    dig_P5 = (int16_t)  ( deviceBME280State.i2cBuffer[14] << 8 ) | deviceBME280State.i2cBuffer[15];
-    dig_P6 = (int16_t)  ( deviceBME280State.i2cBuffer[16] << 8 ) | deviceBME280State.i2cBuffer[17];
-    dig_P7 = (int16_t)  ( deviceBME280State.i2cBuffer[18] << 8 ) | deviceBME280State.i2cBuffer[19];
-    dig_P8 = (int16_t)  ( deviceBME280State.i2cBuffer[20] << 8 ) | deviceBME280State.i2cBuffer[21];
-    dig_P9 = (int16_t)  ( deviceBME280State.i2cBuffer[22] << 8 ) | deviceBME280State.i2cBuffer[23];
+    devBME280_calib_data.dig_P1 = (uint16_t) ( deviceBME280State.i2cBuffer[6]  << 8 ) | deviceBME280State.i2cBuffer[7];
+    devBME280_calib_data.dig_P2 = (int16_t)  ( deviceBME280State.i2cBuffer[8]  << 8 ) | deviceBME280State.i2cBuffer[9];
+    devBME280_calib_data.dig_P3 = (int16_t)  ( deviceBME280State.i2cBuffer[10] << 8 ) | deviceBME280State.i2cBuffer[11];
+    devBME280_calib_data.dig_P4 = (int16_t)  ( deviceBME280State.i2cBuffer[12] << 8 ) | deviceBME280State.i2cBuffer[13];
+    devBME280_calib_data.dig_P5 = (int16_t)  ( deviceBME280State.i2cBuffer[14] << 8 ) | deviceBME280State.i2cBuffer[15];
+    devBME280_calib_data.dig_P6 = (int16_t)  ( deviceBME280State.i2cBuffer[16] << 8 ) | deviceBME280State.i2cBuffer[17];
+    devBME280_calib_data.dig_P7 = (int16_t)  ( deviceBME280State.i2cBuffer[18] << 8 ) | deviceBME280State.i2cBuffer[19];
+    devBME280_calib_data.dig_P8 = (int16_t)  ( deviceBME280State.i2cBuffer[20] << 8 ) | deviceBME280State.i2cBuffer[21];
+    devBME280_calib_data.dig_P9 = (int16_t)  ( deviceBME280State.i2cBuffer[22] << 8 ) | deviceBME280State.i2cBuffer[23];
 
     // dig_H1 ... 6
-    dig_H1 = (uint8_t)  deviceBME280State.i2cBuffer[24];
+    devBME280_calib_data.dig_H1 = (uint8_t)  deviceBME280State.i2cBuffer[24];
 
 
     read_status = readSensorRegisterBME280(0xE1, 7);
     warpPrint("\r\n\t Read status %d", read_status);
 
-    dig_H2 = (int16_t)  deviceBME280State.i2cBuffer[0];
-    warpPrint("\r\n\t dig_H2 %d", dig_H2);
-    dig_H3 = (uint8_t)  deviceBME280State.i2cBuffer[2];
-    dig_H4 = (int16_t)  ( ( (uint8_t) deviceBME280State.i2cBuffer[3] ) << 4  || ( (uint8_t) deviceBME280State.i2cBuffer[4] & 0b00001111 ) );
-    dig_H5 = (int16_t)  ( ( ( (uint8_t) deviceBME280State.i2cBuffer[4] & 0b11110000 ) >> 4 ) || ( (uint8_t) deviceBME280State.i2cBuffer[5] ) << 4  );
-    dig_H6 = (int8_t)   deviceBME280State.i2cBuffer[6];
+    devBME280_calib_data.dig_H2 = (int16_t)  deviceBME280State.i2cBuffer[0];
+    warpPrint("\r\n\t devBME280_calib_data.dig_H2 %d", devBME280_calib_data.dig_H2);
+    devBME280_calib_data.dig_H3 = (uint8_t)  deviceBME280State.i2cBuffer[2];
+    devBME280_calib_data.dig_H4 = (int16_t)  ( ( (uint8_t) deviceBME280State.i2cBuffer[3] ) << 4  || ( (uint8_t) deviceBME280State.i2cBuffer[4] & 0b00001111 ) );
+    devBME280_calib_data.dig_H5 = (int16_t)  ( ( ( (uint8_t) deviceBME280State.i2cBuffer[4] & 0b11110000 ) >> 4 ) || ( (uint8_t) deviceBME280State.i2cBuffer[5] ) << 4  );
+    devBME280_calib_data.dig_H6 = (int8_t)   deviceBME280State.i2cBuffer[6];
 
     return;
 }
@@ -277,9 +277,9 @@ BME280_S32_t t_fine;
 BME280_S32_t BME280_compensate_T_int32(BME280_S32_t adc_T)
 {
     BME280_S32_t var1, var2, T;
-    var1 = ((((adc_T>>3) - ((BME280_S32_t)dig_T1<<1))) * ((BME280_S32_t)dig_T2)) >> 11;
-    var2 = (((((adc_T>>4) - ((BME280_S32_t)dig_T1)) * ((adc_T>>4) - ((BME280_S32_t)dig_T1))) >> 12) *
-            ((BME280_S32_t)dig_T3)) >> 14;
+    var1 = ((((adc_T>>3) - ((BME280_S32_t)devBME280_calib_data.dig_T1<<1))) * ((BME280_S32_t)devBME280_calib_data.dig_T2)) >> 11;
+    var2 = (((((adc_T>>4) - ((BME280_S32_t)devBME280_calib_data.dig_T1)) * ((adc_T>>4) - ((BME280_S32_t)devBME280_calib_data.dig_T1))) >> 12) *
+            ((BME280_S32_t)devBME280_calib_data.dig_T3)) >> 14;
     t_fine = var1 + var2;
     T = (t_fine * 5 + 128) >> 8;
     return T;
@@ -291,20 +291,20 @@ BME280_U32_t BME280_compensate_P_int64(BME280_S32_t adc_P)
 {
     BME280_S64_t var1, var2, p;
     var1 = ((BME280_S64_t)t_fine) - 128000;
-    var2 = var1 * var1 * (BME280_S64_t)dig_P6;
-    var2 = var2 + ((var1*(BME280_S64_t)dig_P5)<<17);
-    var2 = var2 + (((BME280_S64_t)dig_P4)<<35);
-    var1 = ((var1 * var1 * (BME280_S64_t)dig_P3)>>8) + ((var1 * (BME280_S64_t)dig_P2)<<12);
-    var1 = (((((BME280_S64_t)1)<<47)+var1))*((BME280_S64_t)dig_P1)>>33;
+    var2 = var1 * var1 * (BME280_S64_t)devBME280_calib_data.dig_P6;
+    var2 = var2 + ((var1*(BME280_S64_t)devBME280_calib_data.dig_P5)<<17);
+    var2 = var2 + (((BME280_S64_t)devBME280_calib_data.dig_P4)<<35);
+    var1 = ((var1 * var1 * (BME280_S64_t)devBME280_calib_data.dig_P3)>>8) + ((var1 * (BME280_S64_t)devBME280_calib_data.dig_P2)<<12);
+    var1 = (((((BME280_S64_t)1)<<47)+var1))*((BME280_S64_t)devBME280_calib_data.dig_P1)>>33;
     if (var1 == 0)
     {
         return 0; // avoid exception caused by division by zero
     }
     p = 1048576-adc_P;
     p = (((p<<31)-var2)*3125)/var1;
-    var1 = (((BME280_S64_t)dig_P9) * (p>>13) * (p>>13)) >> 25;
-    var2 = (((BME280_S64_t)dig_P8) * p) >> 19;
-    p = ((p + var1 + var2) >> 8) + (((BME280_S64_t)dig_P7)<<4);
+    var1 = (((BME280_S64_t)devBME280_calib_data.dig_P9) * (p>>13) * (p>>13)) >> 25;
+    var2 = (((BME280_S64_t)devBME280_calib_data.dig_P8) * p) >> 19;
+    p = ((p + var1 + var2) >> 8) + (((BME280_S64_t)devBME280_calib_data.dig_P7)<<4);
     return (BME280_U32_t)p;
 }
 
@@ -314,11 +314,11 @@ BME280_U32_t BME280_compensate_H_int32(BME280_S32_t adc_H)
 {
     BME280_S32_t v_x1_u32r;
     v_x1_u32r = (t_fine - ((BME280_S32_t)76800));
-    v_x1_u32r = (((((adc_H << 14) - (((BME280_S32_t)dig_H4) << 20) - (((BME280_S32_t)dig_H5) * v_x1_u32r)) +
-            ((BME280_S32_t)16384)) >> 15) * (((((((v_x1_u32r * ((BME280_S32_t)dig_H6)) >> 10) * (((v_x1_u32r *
-                    ((BME280_S32_t)dig_H3)) >> 11) + ((BME280_S32_t)32768))) >> 10) + ((BME280_S32_t)2097152)) *
-                                              ((BME280_S32_t)dig_H2) + 8192) >> 14));
-    v_x1_u32r = (v_x1_u32r - (((((v_x1_u32r >> 15) * (v_x1_u32r >> 15)) >> 7) * ((BME280_S32_t)dig_H1)) >> 4));
+    v_x1_u32r = (((((adc_H << 14) - (((BME280_S32_t)devBME280_calib_data.dig_H4) << 20) - (((BME280_S32_t)devBME280_calib_data.dig_H5) * v_x1_u32r)) +
+            ((BME280_S32_t)16384)) >> 15) * (((((((v_x1_u32r * ((BME280_S32_t)devBME280_calib_data.dig_H6)) >> 10) * (((v_x1_u32r *
+                    ((BME280_S32_t)devBME280_calib_data.dig_H3)) >> 11) + ((BME280_S32_t)32768))) >> 10) + ((BME280_S32_t)2097152)) *
+                                              ((BME280_S32_t)devBME280_calib_data.dig_H2) + 8192) >> 14));
+    v_x1_u32r = (v_x1_u32r - (((((v_x1_u32r >> 15) * (v_x1_u32r >> 15)) >> 7) * ((BME280_S32_t)devBME280_calib_data.dig_H1)) >> 4));
     v_x1_u32r = (v_x1_u32r < 0 ? 0 : v_x1_u32r);
     v_x1_u32r = (v_x1_u32r > 419430400 ? 419430400 : v_x1_u32r);
     return (BME280_U32_t)(v_x1_u32r>>12);
