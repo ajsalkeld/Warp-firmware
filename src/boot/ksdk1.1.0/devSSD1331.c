@@ -16,7 +16,7 @@
 volatile uint8_t	inBuffer[1];
 volatile uint8_t	payloadBytes[1];
 
-GFXfont * devSSD1331font = &FreeSans8pt7b;
+GFXfont * devSSD1331font = &Org_01;
 
 void devSSD1331SetupSPI (void)
 {
