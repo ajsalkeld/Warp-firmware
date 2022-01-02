@@ -42,6 +42,10 @@ void		initPASCO2(const uint8_t i2cAddress, uint16_t operatingVoltageMillivolts);
 WarpStatus	readSensorRegisterPASCO2(uint8_t deviceRegister, int numberOfBytes);
 WarpStatus writeSensorRegisterPASCO2(uint8_t registerPointer, uint8_t payload);
 void		printSensorDataPASCO2(bool hexModeFlag);
+
+// Set pressure ref from BME280 pressure reading p.
+WarpStatus     devPASCO2SetPressureFromBME280(void);
+
 #define WARP_FIRMWARE_DEVPASCO2_H
 
 #endif //WARP_FIRMWARE_DEVPASCO2_H
