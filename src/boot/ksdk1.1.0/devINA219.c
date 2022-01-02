@@ -35,6 +35,7 @@
 	POSSIBILITY OF SUCH DAMAGE.
 */
 #include <stdlib.h>
+#include <stdio.h>
 
 /*
  *	config.h needs to come first
