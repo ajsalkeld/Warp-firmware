@@ -162,7 +162,7 @@ int devSSD1331init(void)
 
     if (status != kWarpStatusOK)     SEGGER_RTT_WriteString(0, "\r\n\tStatus not OK \n");
 
-    SEGGER_RTT_WriteString(0, "\r\n\tDone with draw rectangle... \n");
+    SEGGER_RTT_WriteString(0, "\r\nOLED Initialized. \n");
 
     return 0;
 }

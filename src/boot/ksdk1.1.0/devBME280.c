@@ -79,16 +79,10 @@ void initBME280(const uint8_t i2cAddress, uint16_t operatingVoltageMillivolts)
     writeSensorRegisterBME280(0xF2, 0b00000001);
 
     // ctrl_meas: Set temp and pressure oversamp to x1; mode to sleep.
-    WarpStatus ctrl_meas_status = writeSensorRegisterBME280(0xF4, 0b00100101);
-    warpPrint("\r\n\t Write status %d", ctrl_meas_status);
+    writeSensorRegisterBME280(0xF4, 0b00100101);
 
-
-    readSensorRegisterBME280(0xD0, 1);
-    uint8_t chip_id = (uint8_t) deviceBME280State.i2cBuffer[0];
-    warpPrint("\r\n\t ctrl_meas 0x%X", chip_id);
-
-    WarpStatus read_status = readSensorRegisterBME280(0x88, 25 /* numberOfBytes */);
-    warpPrint("\r\n\t Read status %d", read_status);
+    // Get Calibration data
+    readSensorRegisterBME280(0x88, 25 /* numberOfBytes */);
 
     // dig_T1 ... 3
     devBME280_calib_data.dig_T1 = ( deviceBME280State.i2cBuffer[0] << 8 ) | deviceBME280State.i2cBuffer[1];
@@ -109,12 +103,10 @@ void initBME280(const uint8_t i2cAddress, uint16_t operatingVoltageMillivolts)
     // dig_H1 ... 6
     devBME280_calib_data.dig_H1 = (uint8_t)  deviceBME280State.i2cBuffer[24];
 
-
-    read_status = readSensorRegisterBME280(0xE1, 7);
-    warpPrint("\r\n\t Read status %d", read_status);
+    // Remaining dig_Hs in E1 ... E8
+    readSensorRegisterBME280(0xE1, 7);
 
     devBME280_calib_data.dig_H2 = (int16_t)  deviceBME280State.i2cBuffer[0];
-    warpPrint("\r\n\t devBME280_calib_data.dig_H2 %d", devBME280_calib_data.dig_H2);
     devBME280_calib_data.dig_H3 = (uint8_t)  deviceBME280State.i2cBuffer[2];
     devBME280_calib_data.dig_H4 = (int16_t)  ( ( (uint8_t) deviceBME280State.i2cBuffer[3] ) << 4  || ( (uint8_t) deviceBME280State.i2cBuffer[4] & 0b00001111 ) );
     devBME280_calib_data.dig_H5 = (int16_t)  ( ( ( (uint8_t) deviceBME280State.i2cBuffer[4] & 0b11110000 ) >> 4 ) || ( (uint8_t) deviceBME280State.i2cBuffer[5] ) << 4  );
