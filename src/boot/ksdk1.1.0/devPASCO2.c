@@ -197,7 +197,7 @@ WarpStatus readSensorRegisterPASCO2(uint8_t registerPointer, int numberOfBytes)
 
 void printSensorDataPASCO2(bool hexModeFlag)
 {
-    int16_t		readSensorRegisterValueCombined;
+    uint16_t		readSensorRegisterValueCombined;
     WarpStatus	i2cReadStatus;
 
 
@@ -236,7 +236,7 @@ void printSensorDataPASCO2(bool hexModeFlag)
         }
         else
         {
-            warpPrint(" %d, %d, ", readSensorRegisterValueCombined, CO2Status);
+            warpPrint(" %d, 0x%02x, ", readSensorRegisterValueCombined, CO2Status);
         }
     }
 }
