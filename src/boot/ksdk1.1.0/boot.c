@@ -196,6 +196,10 @@ uint8_t spi_enabled;
     #include "devSSD1331.h"
 #endif
 
+#if (WARP_BUILD_ENABLE_DEVMQ135)
+    #include "devMQ135.h"
+#endif
+
 
 volatile i2c_master_state_t				i2cMasterState;
 volatile spi_master_state_t				spiMasterState;
@@ -1882,6 +1886,10 @@ main(void)
 		warpPrint("done.\n");
     #endif
 
+    #if (WARP_BUILD_ENABLE_DEVMQ135)
+        initMQ135();
+    #endif
+
     #if (WARP_BUILD_ENABLE_DEVSSD1331)
         devSSD1331init();
     #endif
@@ -3008,6 +3016,10 @@ printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelay
             warpPrint(" pressure, temp, humidity, BME280 status, ");
         #endif
 
+        #if (WARP_BUILD_ENABLE_DEVMQ135)
+                warpPrint(" MQ135 ADC, ");
+        #endif
+
 		warpPrint(" RTC->TSR, RTC->TPR, # Config Errors");
 		warpPrint("\n\n");
 	}
@@ -3064,6 +3076,10 @@ printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelay
 
         #if (WARP_BUILD_ENABLE_DEVBME280)
             printSensorDataBME280(hexModeFlag);
+        #endif
+
+        #if (WARP_BUILD_ENABLE_DEVMQ135)
+            printSensorDataMQ135(hexModeFlag);
         #endif
 
 		warpPrint(" %12d, %6d, %2u\n", RTC->TSR, RTC->TPR, numberOfConfigErrors);

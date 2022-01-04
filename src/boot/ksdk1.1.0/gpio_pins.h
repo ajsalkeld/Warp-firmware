@@ -90,7 +90,10 @@ enum _gpio_pins
     kSSD1331PinRST		= GPIO_MAKE_PIN(HW_GPIOB, 0),
     #endif
     #if (WARP_BUILD_ENABLE_DEVSDSPI)
-    kSDSPIPinCSn = GPIO_MAKE_PIN(HW_GPIOB, 1),
+    kSDSPIPinCSn = GPIO_MAKE_PIN(HW_GPIOB, 1), // find another
+    #endif
+    #if (WARP_BUILD_ENABLE_DEVMQ135)
+    kMQ135ADC = GPIO_MAKE_PIN(HW_GPIOB, 1),
     #endif
 };
 
