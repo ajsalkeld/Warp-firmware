@@ -1069,7 +1069,7 @@ setTPS62740CommonControlLines(uint16_t voltageMillivolts)
 
 
 
-void
+/*void
 warpScaleSupplyVoltage(uint16_t voltageMillivolts)
 {
 	if (voltageMillivolts == gWarpCurrentSupplyVoltage)
@@ -1088,7 +1088,7 @@ warpScaleSupplyVoltage(uint16_t voltageMillivolts)
 			warpPrint(RTT_CTRL_RESET RTT_CTRL_BG_BRIGHT_RED RTT_CTRL_TEXT_BRIGHT_WHITE kWarpConstantStringErrorInvalidVoltage RTT_CTRL_RESET "\n", voltageMillivolts);
 		}
 	#endif
-}
+}*/
 
 
 
@@ -2532,7 +2532,7 @@ main(void)
 						.baudRate_kbps = gWarpI2cBaudRateKbps
 					};
 
-					warpScaleSupplyVoltage(gWarpCurrentSupplyVoltage);
+					//warpScaleSupplyVoltage(gWarpCurrentSupplyVoltage);
 					warpEnableI2Cpins();
 
 					commandByte[0] = menuRegisterAddress;
@@ -2685,7 +2685,7 @@ main(void)
 			 */
 			case 'n':
 			{
-				warpScaleSupplyVoltage(gWarpCurrentSupplyVoltage);
+				//warpScaleSupplyVoltage(gWarpCurrentSupplyVoltage);
 				break;
 			}
 
@@ -3013,7 +3013,7 @@ printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelay
         #endif
 
         #if (WARP_BUILD_ENABLE_DEVBME280)
-            warpPrint(" pressure, temp, humidity, BME280 status, ");
+            warpPrint(" temp, pressure, humidity, BME280 status, ");
         #endif
 
         #if (WARP_BUILD_ENABLE_DEVMQ135)
@@ -3128,7 +3128,7 @@ loopForSensor(	const char *  tagString,
 		warpPrint(RTT_CTRL_RESET RTT_CTRL_BG_BRIGHT_YELLOW RTT_CTRL_TEXT_BRIGHT_WHITE kWarpConstantStringErrorSanity RTT_CTRL_RESET "\n");
 	}
 
-	warpScaleSupplyVoltage(actualSssupplyMillivolts);
+	//warpScaleSupplyVoltage(actualSssupplyMillivolts);
 	warpPrint(tagString);
 
 	/*
@@ -3146,7 +3146,7 @@ loopForSensor(	const char *  tagString,
 				if (actualSssupplyMillivolts > sssupplyMillivolts)
 				{
 					actualSssupplyMillivolts -= 100;
-					warpScaleSupplyVoltage(actualSssupplyMillivolts);
+					//warpScaleSupplyVoltage(actualSssupplyMillivolts);
 				}
 
 				if (spiDeviceState)
@@ -3189,7 +3189,7 @@ loopForSensor(	const char *  tagString,
 				if (actualSssupplyMillivolts < adaptiveSssupplyMaxMillivolts)
 				{
 					actualSssupplyMillivolts += 100;
-					warpScaleSupplyVoltage(actualSssupplyMillivolts);
+					//warpScaleSupplyVoltage(actualSssupplyMillivolts);
 				}
 			}
 			else if (status == kWarpStatusBadDeviceCommand)
