@@ -57,13 +57,19 @@ void initMQ135( void )
     ADC16_DRV_SetCalibrationParam(0, &AdcCalibraitionParam);
     #endif // FSL_FEATURE_ADC16_HAS_CALIBRATION //
 
+    // Initialize the ADC converter. //
+    // First get default single-shot options.
+    ADC16_DRV_StructInitUserConfigDefault(&AdcUsrConfig);
+
     // Set to 8-bit
     AdcUsrConfig.resolutionMode = kAdcResolutionBitOfSingleEndAs8;
 
-    // Initialize the ADC converter. //
-    ADC16_DRV_StructInitUserConfigDefault(&AdcUsrConfig);
+    // Set ADC reference high to VDD = 3.0V
+    AdcUsrConfig.refVoltSrcMode = kAdcRefVoltSrcOfVref;
+
     ADC16_DRV_Init(0, &AdcUsrConfig);
 
+    // Set channel config
     ChnConfig.chnNum = MQ135_CHANNEL;
     ChnConfig.diffEnable = 0;
     ChnConfig.intEnable = 0;
