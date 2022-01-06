@@ -40,12 +40,28 @@
 
 #include <stdint.h>
 
+typedef struct
+{
+    uint8_t     status;
+    int32_t     temp;       // 0.01 degC
+    uint32_t    pressure;   // 0.01 Pa
+    uint32_t    humidity;   // Q22.10 (i.e. >> 10 for integer)
+} devBME280Results;
+
 // I2C Comms
 WarpStatus readSensorRegisterBME280(uint8_t registerPointer, int numberOfBytes);
+
 WarpStatus writeSensorRegisterBME280(uint8_t registerPointer, uint8_t payload);
+
 void initBME280(const uint8_t i2cAddress, uint16_t operatingVoltageMillivolts);
+
+WarpStatus getReadingsBME280 (devBME280Results * results_ptr, bool hexModeFlag);
+
 void printSensorDataBME280(bool hexModeFlag);
+
 #define triggerBME280(void) writeSensorRegisterBME280(0xF4, 0b00100101)
+
+#define BME280_CONCAT_BYTES(msb, lsb)             (((uint16_t)msb << 8) | (uint16_t)lsb)
 
 // Conversions
 
@@ -55,36 +71,35 @@ typedef int64_t     BME280_S64_t;
 
 extern BME280_S32_t t_fine;
 
-struct devBME280CalibData {
-    uint16_t dig_T1;     // 0x88 ...
-    int16_t dig_T2;
-    int16_t dig_T3;
+struct devBME280CalibData
+{
+    uint16_t    dig_T1;     // 0x88 ...
+    int16_t     dig_T2;
+    int16_t     dig_T3;
 
-    uint16_t dig_P1;
-    int16_t dig_P2;
-    int16_t dig_P3;
-    int16_t dig_P4;
-    int16_t dig_P5;
-    int16_t dig_P6;
-    int16_t dig_P7;
-    int16_t dig_P8;
-    int16_t dig_P9;
+    uint16_t    dig_P1;
+    int16_t     dig_P2;
+    int16_t     dig_P3;
+    int16_t     dig_P4;
+    int16_t     dig_P5;
+    int16_t     dig_P6;
+    int16_t     dig_P7;
+    int16_t     dig_P8;
+    int16_t     dig_P9;
 
-    uint8_t dig_H1;     // 0xE1
-    int16_t dig_H2;
-    uint8_t dig_H3;
-    int16_t dig_H4;
-    int16_t dig_H5;
-    int8_t dig_H6;
+    uint8_t     dig_H1;     // 0xE1
+    int16_t     dig_H2;
+    uint8_t     dig_H3;
+    int16_t     dig_H4;
+    int16_t     dig_H5;
+    int8_t      dig_H6;
 } devBME280_calib_data;
 
+// Conversion functions
+int32_t     BME280_compensate_temperature(int32_t adc_T);
 
-// Conversion functions from BME280 datasheet
-BME280_S32_t BME280_compensate_T_int32(BME280_S32_t adc_T);
+uint32_t    BME280_compensate_pressure(int32_t adc_P);
 
-BME280_U32_t BME280_compensate_P_int64(BME280_S32_t adc_P);
-
-BME280_U32_t BME280_compensate_H_int32(int32_t adc_H);
-
+uint32_t    BME280_compensate_humidity(int32_t adc_H);
 
 #endif //WARP_FIRMWARE_DEVBME280_H

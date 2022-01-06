@@ -122,7 +122,7 @@ WarpStatus writeSensorRegisterPASCO2(uint8_t registerPointer, uint8_t payload)
                     .baudRate_kbps = gWarpI2cBaudRateKbps
             };
 
-    warpScaleSupplyVoltage(devicePASCO2State.operatingVoltageMillivolts);
+    //warpScaleSupplyVoltage(devicePASCO2State.operatingVoltageMillivolts);
     commandByte[0] = registerPointer;
     payloadByte[0] = payload;
     warpEnableI2Cpins();
@@ -175,7 +175,7 @@ WarpStatus readSensorRegisterPASCO2(uint8_t registerPointer, int numberOfBytes)
                     .baudRate_kbps = gWarpI2cBaudRateKbps
             };
 
-    warpScaleSupplyVoltage(devicePASCO2State.operatingVoltageMillivolts);
+    //warpScaleSupplyVoltage(devicePASCO2State.operatingVoltageMillivolts);
     warpEnableI2Cpins();
 
     status = I2C_DRV_MasterReceiveDataBlocking(
@@ -201,7 +201,7 @@ void printSensorDataPASCO2(bool hexModeFlag)
     WarpStatus	i2cReadStatus;
 
 
-    warpScaleSupplyVoltage(devicePASCO2State.operatingVoltageMillivolts);
+    //warpScaleSupplyVoltage(devicePASCO2State.operatingVoltageMillivolts);
 
     // Reset warning statuses
     writeSensorRegisterPASCO2(0x01, 0b00000111);
@@ -247,18 +247,15 @@ WarpStatus     devPASCO2SetPressureFromBME280()
 #if (WARP_BUILD_ENABLE_DEVBME280)
     // trigger a new measurement twice (first data from BME280 not always correct)
     triggerBME280();
-    triggerBME280();
 
-    WarpStatus BME280ReadStatus = readSensorRegisterBME280(0xF7, 3);
+    devBME280Results readings;
+
+    WarpStatus BME280ReadStatus = getReadingsBME280(&readings, 0);
 
     if (BME280ReadStatus == kWarpStatusOK)
     {
-        // Received press. MSB, LSB, XLSB; temp MSB, LSB, XLSB; hum. MSB, LSB. Positive but store signed.
-        int32_t receivedPressure = ( deviceBME280State.i2cBuffer[0] << 12 ) | ( deviceBME280State.i2cBuffer[1] << 4 )
-                                   | ( (deviceBME280State.i2cBuffer[2] & 0xF0) >> 4 );
-
         // Divide to hpa
-        uint16_t pressure_hpa = BME280_compensate_P_int64(receivedPressure) / 25600;
+        uint16_t pressure_hpa = readings.pressure / 10000;
 
         // Write to PASCO2
         i2CWriteStatus1 = writeSensorRegisterPASCO2(0x0B, ((pressure_hpa & 0xFF00) >> 8) );
