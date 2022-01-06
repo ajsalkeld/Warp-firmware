@@ -49,21 +49,21 @@ typedef enum
 	kSSD1331CommandVCOMH		= 0xBE,
 } SSD1331Commands;
 
-typedef struct RGB {
+typedef struct {
     uint16_t R;
     uint16_t G;
     uint16_t B;
 } RGB;
 
-struct RGB light_green = {
+RGB light_green = {
         0x10, 0x3F, 0x00
 };
 
-struct RGB black = {
+RGB black = {
         0x00, 0x00, 0x00
 };
 
-struct RGB white = {
+RGB white = {
         0xFF, 0xFF, 0xFF
 };
 
