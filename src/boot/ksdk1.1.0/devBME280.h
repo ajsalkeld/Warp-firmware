@@ -57,7 +57,11 @@ void initBME280(const uint8_t i2cAddress, uint16_t operatingVoltageMillivolts);
 
 WarpStatus getReadingsBME280 (devBME280Results * results_ptr, bool hexModeFlag);
 
+#if (WARP_DEBUG_INTERFACE)
 void printSensorDataBME280(bool hexModeFlag);
+#else
+
+#endif
 
 #define triggerBME280(void) writeSensorRegisterBME280(0xF4, 0b00100101)
 

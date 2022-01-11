@@ -1135,26 +1135,6 @@ warpLowPowerSecondsSleep(uint32_t sleepSeconds, bool forceAllPinsIntoLowPowerSta
 }
 
 
-/*
-void
-printPinDirections(void)
-{
-	warpPrint("I2C0_SDA:%d\n", GPIO_DRV_GetPinDir(kWarpPinI2C0_SDA_UART_RX));
-	OSA_TimeDelay(100);
-	warpPrint("I2C0_SCL:%d\n", GPIO_DRV_GetPinDir(kWarpPinI2C0_SCL_UART_TX));
-	OSA_TimeDelay(100);
-	warpPrint("SPI_MOSI:%d\n", GPIO_DRV_GetPinDir(kWarpPinSPI_MOSI_UART_CTS));
-	OSA_TimeDelay(100);
-	warpPrint("SPI_MISO:%d\n", GPIO_DRV_GetPinDir(kWarpPinSPI_MISO_UART_RTS));
-	OSA_TimeDelay(100);
-	warpPrint("SPI_SCK_I2C_PULLUP_EN:%d\n", GPIO_DRV_GetPinDir(kWarpPinSPI_SCK_I2C_PULLUP_EN));
-	OSA_TimeDelay(100);
-	warpPrint("ADXL362_CS:%d\n", GPIO_DRV_GetPinDir(kWarpPinADXL362_CS));
-	OSA_TimeDelay(100);
-}
-*/
-
-
 
 void
 dumpProcessorState(void)
@@ -2065,6 +2045,8 @@ main(void)
 		}
     #endif
 
+#if (WARP_DEBUG_INTERFACE)
+
 	while (1)
 	{
 		/*
@@ -2872,10 +2854,79 @@ main(void)
 		}
 	}
 
+
+#else // !WARP_DEBUG_INTERFACE
+
+/**********************************************************
+ * Polling every ~10 seconds:
+ *    1) Read PASCO2, BME280, MQ135 data
+ *    2) Calculate CO2 from regression model (MQ135, BME280)
+ *    3) Write both CO2 values to display and WarpPrint.
+ *    4) If trend is increasing or value over 1000, light OLED red
+ *********************************************************/
+
+
+
+#endif // WARP_DEBUG_INTERFACE
+
+    while(1)
+    {
+
+        // Estimated CO2 from MQ135 and BME280, if available
+        uint16_t estimated_co2;
+
+        // Get MQ135 ADC value
+        uint8_t mq135_reading = getReadingMQ135();
+
+        // Get TPH
+        devBME280Results bme280_readings;
+
+        WarpStatus bme280ReadStatus = getReadingsBME280(&bme280_readings, 0);
+
+        if (bme280ReadStatus == kWarpStatusOK)
+        {
+            // Use multivariate model
+            estimated_co2 = - 38445 + ( 36 * (uint64_t) bme280_readings.pressure + 265597 * (uint64_t) (bme280_readings.humidity >> 10) + 115017 * (uint64_t) mq135_reading ) / 10000;
+
+        }
+
+        else
+        {
+            // Use model only from ADC value
+            estimated_co2 = - 767 + 1762 * mq135_reading / 100;
+        }
+
+
+        // Get PASCO2 reading
+        uint16_t pasco2_reading = getReadingPASCO2();
+
+        // Write to WarpPrint
+        warpPrint("Temperature: %u degC;\t Pressure: %u hPa;\t Humidity: %u %%;\n", bme280_readings.temp, bme280_readings.pressure / 10000, bme280_readings.humidity >> 10);
+
+        warpPrint("Estimated CO2: %u ppm\n", estimated_co2);
+
+        warpPrint("PASCO2: %u ppm\n", pasco2_reading);
+
+        // Write to screen
+        char pasco2_printout[5];
+        sprintf(pasco2_printout, "%4u\0", pasco2_reading);
+
+        char estimated_co2_printout[5];
+        sprintf(estimated_co2_printout, "%4u\0", estimated_co2);
+
+        devSSD1331ClearScreen();
+
+        devSSD1331print(10, 10, pasco2_printout, white);
+
+        devSSD1331print(10, 30, estimated_co2_printout, white);
+
+        OSA_TimeDelay(10000);
+    }
+
 	return 0;
-}
+} // main
 
-
+#if (WARP_DEBUG_INTERFACE)
 
 void
 printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelayBetweenEachRun, bool loopForever)
@@ -4121,3 +4172,5 @@ activateAllLowPowerSensorModes(bool verbose)
 		GPIO_DRV_ClearPinOutput(kWarpPinSI4705_nRST);
 	#endif
 }
+
+#endif // WARP_DEBUG_INTERFACE

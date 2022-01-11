@@ -77,7 +77,7 @@ void initBME280(const uint8_t i2cAddress, uint16_t operatingVoltageMillivolts)
     writeSensorRegisterBME280(0xF2, 0b00000001);
 
     // ctrl_meas: Set temp and pressure oversamp to x1; mode to sleep.
-    writeSensorRegisterBME280(0xF4, 0b10110100);
+    writeSensorRegisterBME280(0xF4, 0b00100100);
 
     // Get Calibration data
     readSensorRegisterBME280(0x88, 26 /* numberOfBytes */);
@@ -253,6 +253,7 @@ WarpStatus getReadingsBME280 (devBME280Results * results_ptr, bool hexModeFlag)
     return (i2cReadStatus1 || i2cReadStatus2);
 }
 
+#if (WARP_DEBUG_INTERFACE)
 void printSensorDataBME280(bool hexModeFlag)
 {
     WarpStatus	i2cReadStatus;
@@ -277,6 +278,8 @@ void printSensorDataBME280(bool hexModeFlag)
         }
     }
 }
+#endif
+
 
 /*************************************************************************************************
  Conversion functions adapted from Bosch API. (https://github.com/BoschSensortec/BME280_driver)

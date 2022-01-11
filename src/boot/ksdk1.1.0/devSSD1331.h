@@ -86,6 +86,8 @@ int devSSD1331print (uint8_t x, uint8_t y, char* c, RGB color);
 
 void devSSD1331SetupSPI (void);
 
+int devSSD1331ClearScreen (void);
+
 static int devSSD1331WriteCommand (uint8_t commandByte);
 
 #endif

@@ -195,6 +195,48 @@ WarpStatus readSensorRegisterPASCO2(uint8_t registerPointer, int numberOfBytes)
     return kWarpStatusOK;
 }
 
+WarpStatus     devPASCO2SetPressureFromBME280()
+{
+    WarpStatus i2CWriteStatus1, i2CWriteStatus2;
+#if (WARP_BUILD_ENABLE_DEVBME280)
+    // trigger a new measurement twice (first data from BME280 not always correct)
+    triggerBME280();
+
+    devBME280Results readings;
+
+    WarpStatus BME280ReadStatus = getReadingsBME280(&readings, 0);
+
+    if (BME280ReadStatus == kWarpStatusOK)
+    {
+        // Divide to hpa
+        uint16_t pressure_hpa = readings.pressure / 10000;
+
+        // Write to PASCO2
+        i2CWriteStatus1 = writeSensorRegisterPASCO2(0x0B, ((pressure_hpa & 0xFF00) >> 8) );
+        i2CWriteStatus2 = writeSensorRegisterPASCO2(0x0C, (pressure_hpa & 0x00FF));
+
+        return (i2CWriteStatus1 | i2CWriteStatus2);
+    }
+    else
+    {
+        // Can't connect to BME280, just set to 1013 hPa
+        i2CWriteStatus1 = writeSensorRegisterPASCO2(0x0B, 0x03);
+        i2CWriteStatus2 = writeSensorRegisterPASCO2(0x0C, 0xF5);
+
+        return (i2CWriteStatus1 | i2CWriteStatus2);
+    }
+
+#else
+    // BME280 compiled out, use 1013 hPa.
+    i2CWriteStatus1 = writeSensorRegisterPASCO2(0x0B, 0x03);
+    i2CWriteStatus2 = writeSensorRegisterPASCO2(0x0C, 0xF5);
+
+    return (i2CWriteStatus1 | i2CWriteStatus2);
+#endif
+
+}
+
+#if (WARP_DEBUG_INTERFACE)
 void printSensorDataPASCO2(bool hexModeFlag)
 {
     uint16_t		readSensorRegisterValueCombined;
@@ -240,44 +282,35 @@ void printSensorDataPASCO2(bool hexModeFlag)
         }
     }
 }
-
-WarpStatus     devPASCO2SetPressureFromBME280()
-{
-    WarpStatus i2CWriteStatus1, i2CWriteStatus2;
-#if (WARP_BUILD_ENABLE_DEVBME280)
-    // trigger a new measurement twice (first data from BME280 not always correct)
-    triggerBME280();
-
-    devBME280Results readings;
-
-    WarpStatus BME280ReadStatus = getReadingsBME280(&readings, 0);
-
-    if (BME280ReadStatus == kWarpStatusOK)
-    {
-        // Divide to hpa
-        uint16_t pressure_hpa = readings.pressure / 10000;
-
-        // Write to PASCO2
-        i2CWriteStatus1 = writeSensorRegisterPASCO2(0x0B, ((pressure_hpa & 0xFF00) >> 8) );
-        i2CWriteStatus2 = writeSensorRegisterPASCO2(0x0C, (pressure_hpa & 0x00FF));
-
-        return (i2CWriteStatus1 | i2CWriteStatus2);
-    }
-    else
-    {
-        // Can't connect to BME280, just set to 1013 hPa
-        i2CWriteStatus1 = writeSensorRegisterPASCO2(0x0B, 0x03);
-        i2CWriteStatus2 = writeSensorRegisterPASCO2(0x0C, 0xF5);
-
-        return (i2CWriteStatus1 | i2CWriteStatus2);
-    }
-
 #else
-    // BME280 compiled out, use 1013 hPa.
-    i2CWriteStatus1 = writeSensorRegisterPASCO2(0x0B, 0x03);
-    i2CWriteStatus2 = writeSensorRegisterPASCO2(0x0C, 0xF5);
 
-    return (i2CWriteStatus1 | i2CWriteStatus2);
-#endif
+uint16_t getReadingPASCO2 ( void )
+{
+    uint16_t		readSensorRegisterValueCombined;
 
+    // Reset warning statuses
+    writeSensorRegisterPASCO2(0x01, 0b00000111);
+
+    // Set pressure from BME280 sensor
+    devPASCO2SetPressureFromBME280();
+    OSA_TimeDelay(300);
+
+    // Single measurement
+    writeSensorRegisterPASCO2(0x04, 0x01);
+    OSA_TimeDelay(1000);
+
+    // Get CO2 PPM
+    WarpStatus i2cReadStatus = readSensorRegisterPASCO2(0x05, 2);
+
+    // Receive MSB,LSB
+    readSensorRegisterValueCombined = (uint16_t) ( ( devicePASCO2State.i2cBuffer[0] << 8 ) | devicePASCO2State.i2cBuffer[1] );
+
+
+    if (i2cReadStatus == kWarpStatusOK)
+        return readSensorRegisterValueCombined;
+
+    else
+        return 0;
 }
+
+#endif

@@ -108,6 +108,7 @@
     #define     WARP_BUILD_ENABLE_DEVSSD1331        1
     #define     WARP_BUILD_ENABLE_DEVSDSPI          0
     #define     WARP_BUILD_ENABLE_DEVMQ135          1
+    #define     WARP_DEBUG_INTERFACE                0
 #else
 	/*
 	 *	Otherwise: Edit these to set which code paths are activated in the firmware compilation

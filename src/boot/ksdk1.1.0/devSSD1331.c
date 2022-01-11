@@ -143,11 +143,7 @@ int devSSD1331init(void)
     /*
      *	Clear Screen
      */
-    devSSD1331WriteCommand(kSSD1331CommandCLEAR);
-    devSSD1331WriteCommand(0x00);
-    devSSD1331WriteCommand(0x00);
-    devSSD1331WriteCommand(0x5F);
-    devSSD1331WriteCommand(0x3F);
+    int status = devSSD1331ClearScreen();
 
 
 
@@ -155,10 +151,10 @@ int devSSD1331init(void)
      *	Any post-initialization drawing commands go here.
      */
 
-    int status = devSSD1331DrawRectangle(0x00, 0x3E, 0x00, 0x5E, black, black);
+    //devSSD1331DrawRectangle(0x00, 0x3E, 0x00, 0x5E, black, black);
 
-    char test_str[] = "Hello World!";
-    devSSD1331print(10,14,test_str,white);
+    //char test_str[] = "Hello World!";
+    //devSSD1331print(10,14,test_str,white);
 
     if (status != kWarpStatusOK)     SEGGER_RTT_WriteString(0, "\r\n\tStatus not OK \n");
 
@@ -195,6 +191,17 @@ int devSSD1331DrawLine (uint8_t first_row, uint8_t last_row, uint8_t first_col, 
     devSSD1331WriteCommand(line.R);     // Line R
     devSSD1331WriteCommand(line.G);     // Line G
     int status = devSSD1331WriteCommand(line.B);     // Line B
+
+    return status;
+}
+
+int devSSD1331ClearScreen (void)
+{
+    devSSD1331WriteCommand(kSSD1331CommandCLEAR);
+    devSSD1331WriteCommand(0x00);
+    devSSD1331WriteCommand(0x00);
+    devSSD1331WriteCommand(0x5F);
+    int status = devSSD1331WriteCommand(0x3F);
 
     return status;
 }

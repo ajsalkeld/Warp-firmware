@@ -101,6 +101,7 @@ uint8_t getReadingMQ135 (void)
     return MQ135Converted;
 }
 
+#if (WARP_DEBUG_INTERFACE)
 void printSensorDataMQ135(bool hexModeFlag)
 {
     uint8_t reading = getReadingMQ135();
@@ -113,3 +114,6 @@ void printSensorDataMQ135(bool hexModeFlag)
         warpPrint(" %d, ", reading);
     }
 }
+#else
+
+#endif
