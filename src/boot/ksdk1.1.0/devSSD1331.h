@@ -67,6 +67,10 @@ RGB white = {
         0xFF, 0xFF, 0xFF
 };
 
+RGB red = {
+        0xFF, 0x00, 0x00
+};
+
 extern GFXfont * devSSD1331font;
 
 int	devSSD1331init(void);

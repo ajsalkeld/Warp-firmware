@@ -268,7 +268,7 @@ int devSSD1331print (uint8_t x, uint8_t y, char* c, RGB color)
             y += devSSD1331font->yAdvance;
         }
 
-        // Check scree-space
+        // Check screen-space
         if (y > (SSD1331_HEIGHT - devSSD1331font->yAdvance))
         {
             return 1;

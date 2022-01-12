@@ -2869,6 +2869,11 @@ main(void)
 
 #endif // WARP_DEBUG_INTERFACE
 
+    // Macro
+    #define CO2_ALARM (estimated_co2 > prev_estimated_co2) || (estimated_co2 > 1000)
+
+    uint16_t prev_estimated_co2 = 999;
+
     while(1)
     {
 
@@ -2886,14 +2891,14 @@ main(void)
         if (bme280ReadStatus == kWarpStatusOK)
         {
             // Use multivariate model
-            estimated_co2 = - 38445 + ( 36 * (uint64_t) bme280_readings.pressure + 265597 * (uint64_t) (bme280_readings.humidity >> 10) + 115017 * (uint64_t) mq135_reading ) / 10000;
+            estimated_co2 = - 26408 + ( 9318 * (uint64_t) bme280_readings.temp + 23 * (uint64_t) bme280_readings.pressure + 345516 * (uint64_t) (bme280_readings.humidity >> 10) + 63196 * (uint64_t) mq135_reading ) / 10000;
 
         }
 
         else
         {
             // Use model only from ADC value
-            estimated_co2 = - 767 + 1762 * mq135_reading / 100;
+            estimated_co2 = - 953 + 19512 * mq135_reading / 1000;
         }
 
 
@@ -2905,7 +2910,7 @@ main(void)
 
         warpPrint("Estimated CO2: %u ppm\n", estimated_co2);
 
-        warpPrint("PASCO2: %u ppm\n", pasco2_reading);
+        warpPrint("PASCO2: %u ppm\n\n", pasco2_reading);
 
         // Write to screen
         char pasco2_printout[5];
@@ -2914,11 +2919,15 @@ main(void)
         char estimated_co2_printout[5];
         sprintf(estimated_co2_printout, "%4u\0", estimated_co2);
 
-        devSSD1331ClearScreen();
+        // Red background if co2 is in alarm
+        if (CO2_ALARM) devSSD1331DrawRectangle(0x00, 0x3E, 0x00, 0x5E, red, red);
+        else devSSD1331ClearScreen();
 
         devSSD1331print(10, 10, pasco2_printout, white);
 
         devSSD1331print(10, 30, estimated_co2_printout, white);
+
+        prev_estimated_co2 = estimated_co2;
 
         OSA_TimeDelay(10000);
     }
