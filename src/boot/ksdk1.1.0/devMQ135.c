@@ -67,6 +67,7 @@ void initMQ135( void )
     // Set ADC reference high to VDD = 3.0V
     AdcUsrConfig.refVoltSrcMode = kAdcRefVoltSrcOfVref;
 
+    // Configure ADC
     ADC16_DRV_Init(0, &AdcUsrConfig);
 
     // Set channel config
@@ -88,10 +89,6 @@ uint8_t getReadingMQ135 (void)
 
     // Fetch the conversion value and format it.
     uint8_t MQ135AdcValue = ADC16_DRV_GetConvValueRAW(0, 0);
-    /*warpPrint("ADC16_DRV_GetConvValueRAW: 0x%X\t", MQ135AdcValue);
-    warpPrint("ADC16_DRV_ConvRAWData: %ld\r\n",
-           ADC16_DRV_ConvRAWData(MQ135AdcValue, false,
-                                 kAdcResolutionBitOfSingleEndAs8) );*/
 
     uint8_t MQ135Converted = ADC16_DRV_ConvRAWData(MQ135AdcValue, false,
                                                    kAdcResolutionBitOfSingleEndAs8);

@@ -156,7 +156,7 @@ int devSSD1331init(void)
     //char test_str[] = "Hello World!";
     //devSSD1331print(10,14,test_str,white);
 
-    if (status != kWarpStatusOK)     SEGGER_RTT_WriteString(0, "\r\n\tStatus not OK \n");
+    if (status != kWarpStatusOK)     SEGGER_RTT_WriteString(0, "\r\n\tSSD1331 Status not OK \n");
 
     SEGGER_RTT_WriteString(0, "\r\nOLED Initialized. \n");
 
