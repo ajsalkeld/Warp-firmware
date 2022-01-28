@@ -62,6 +62,7 @@
 #include "gpio_pins.h"
 #include "SEGGER_RTT.h"
 
+uint8_t spi_enabled;
 
 #define							kWarpConstantStringI2cFailure		"\rI2C failed, reg 0x%02x, code %d\n"
 #define							kWarpConstantStringErrorInvalidVoltage	"\rInvalid supply voltage [%d] mV!"
@@ -103,6 +104,21 @@
 #if (WARP_BUILD_ENABLE_DEVMMA8451Q)
 	#include "devMMA8451Q.h"
 	volatile WarpI2CDeviceState			deviceMMA8451QState;
+#endif
+
+#if (WARP_BUILD_ENABLE_DEVINA219)
+	#include "devINA219.h"
+	volatile WarpI2CDeviceState			deviceINA219State;
+#endif
+
+#if (WARP_BUILD_ENABLE_DEVPASCO2)
+	#include "devPASCO2.h"
+	volatile WarpI2CDeviceState			devicePASCO2State;
+#endif
+
+#if (WARP_BUILD_ENABLE_DEVBME280)
+	#include "devBME280.h"
+	volatile WarpI2CDeviceState			deviceBME280State;
 #endif
 
 #if (WARP_BUILD_ENABLE_DEVLPS25H)
@@ -174,6 +190,14 @@
 #if (WARP_BUILD_ENABLE_DEVBGX)
 	#include "devBGX.h"
 	volatile WarpUARTDeviceState			deviceBGXState;
+#endif
+
+#if (WARP_BUILD_ENABLE_DEVSSD1331)
+    #include "devSSD1331.h"
+#endif
+
+#if (WARP_BUILD_ENABLE_DEVMQ135)
+    #include "devMQ135.h"
 #endif
 
 
@@ -507,6 +531,8 @@ warpEnableSPIpins(void)
 	spiUserConfig.bitsPerSec	= gWarpSpiBaudRateKbps * 1000;
 	SPI_DRV_MasterInit(0 /* SPI master instance */, (spi_master_state_t *)&spiMasterState);
 	SPI_DRV_MasterConfigureBus(0 /* SPI master instance */, (spi_master_user_config_t *)&spiUserConfig, &calculatedBaudRate);
+
+    spi_enabled = 1;
 }
 
 
@@ -536,6 +562,8 @@ warpDisableSPIpins(void)
 	GPIO_DRV_ClearPinOutput(kWarpPinSPI_SCK);
 
 	CLOCK_SYS_DisableSpiClock(0);
+
+    spi_enabled = 0;
 }
 
 
@@ -1041,7 +1069,7 @@ setTPS62740CommonControlLines(uint16_t voltageMillivolts)
 
 
 
-void
+/*void
 warpScaleSupplyVoltage(uint16_t voltageMillivolts)
 {
 	if (voltageMillivolts == gWarpCurrentSupplyVoltage)
@@ -1060,7 +1088,7 @@ warpScaleSupplyVoltage(uint16_t voltageMillivolts)
 			warpPrint(RTT_CTRL_RESET RTT_CTRL_BG_BRIGHT_RED RTT_CTRL_TEXT_BRIGHT_WHITE kWarpConstantStringErrorInvalidVoltage RTT_CTRL_RESET "\n", voltageMillivolts);
 		}
 	#endif
-}
+}*/
 
 
 
@@ -1105,26 +1133,6 @@ warpLowPowerSecondsSleep(uint32_t sleepSeconds, bool forceAllPinsIntoLowPowerSta
 		warpPrint("warpSetLowPowerMode(kWarpPowerModeVLPS, 0 /* sleep seconds : irrelevant here */)() failed...\n");
 	}
 }
-
-
-/*
-void
-printPinDirections(void)
-{
-	warpPrint("I2C0_SDA:%d\n", GPIO_DRV_GetPinDir(kWarpPinI2C0_SDA_UART_RX));
-	OSA_TimeDelay(100);
-	warpPrint("I2C0_SCL:%d\n", GPIO_DRV_GetPinDir(kWarpPinI2C0_SCL_UART_TX));
-	OSA_TimeDelay(100);
-	warpPrint("SPI_MOSI:%d\n", GPIO_DRV_GetPinDir(kWarpPinSPI_MOSI_UART_CTS));
-	OSA_TimeDelay(100);
-	warpPrint("SPI_MISO:%d\n", GPIO_DRV_GetPinDir(kWarpPinSPI_MISO_UART_RTS));
-	OSA_TimeDelay(100);
-	warpPrint("SPI_SCK_I2C_PULLUP_EN:%d\n", GPIO_DRV_GetPinDir(kWarpPinSPI_SCK_I2C_PULLUP_EN));
-	OSA_TimeDelay(100);
-	warpPrint("ADXL362_CS:%d\n", GPIO_DRV_GetPinDir(kWarpPinADXL362_CS));
-	OSA_TimeDelay(100);
-}
-*/
 
 
 
@@ -1606,8 +1614,20 @@ main(void)
 
 	#if (WARP_BUILD_ENABLE_DEVMMA8451Q)
 //		initMMA8451Q(	0x1C	/* i2cAddress */,	&deviceMMA8451QState,		kWarpDefaultSupplyVoltageMillivoltsMMA8451Q	);
-		initMMA8451Q(	0x1C	/* i2cAddress */,		kWarpDefaultSupplyVoltageMillivoltsMMA8451Q	);
-	#endif
+		initMMA8451Q(	0x1D	/* i2cAddress */,		kWarpDefaultSupplyVoltageMillivoltsMMA8451Q	);
+    #endif
+
+    #if (WARP_BUILD_ENABLE_DEVINA219)
+        initINA219(	    0x40	/* i2cAddress */,		kWarpDefaultSupplyVoltageMillivoltsINA219	);
+    #endif
+
+    #if (WARP_BUILD_ENABLE_DEVPASCO2)
+        initPASCO2(     0x28,   kWarpDefaultSupplyVoltageMillivoltsPASCO2 );
+    #endif
+
+    #if (WARP_BUILD_ENABLE_DEVBME280)
+        initBME280(     0x77,   kWarpDefaultSupplyVoltageMillivoltsBME280 );
+    #endif
 
 	#if (WARP_BUILD_ENABLE_DEVLPS25H)
 		initLPS25H(	0x5C	/* i2cAddress */,	&deviceLPS25HState,		kWarpDefaultSupplyVoltageMillivoltsLPS25H	);
@@ -1844,7 +1864,15 @@ main(void)
 		warpPrint("initBGX()... ");
 		initBGX(kWarpDefaultSupplyVoltageMillivoltsBGX);
 		warpPrint("done.\n");
-	#endif
+    #endif
+
+    #if (WARP_BUILD_ENABLE_DEVMQ135)
+        initMQ135();
+    #endif
+
+    #if (WARP_BUILD_ENABLE_DEVSSD1331)
+        devSSD1331init();
+    #endif
 
 	/*
 	 *	If WARP_BUILD_DISABLE_SUPPLIES_BY_DEFAULT, will turn of the supplies
@@ -2015,7 +2043,9 @@ main(void)
 			}
 			warpPrint("Should not get here...");
 		}
-	#endif
+    #endif
+
+#if (WARP_DEBUG_INTERFACE)
 
 	while (1)
 	{
@@ -2168,7 +2198,25 @@ main(void)
 					warpPrint("\r\t- 'k' AS7263			(0x00--0x2B): 2.7V -- 3.6V\n");
 				#else
 					warpPrint("\r\t- 'k' AS7263			(0x00--0x2B): 2.7V -- 3.6V (compiled out) \n");
-				#endif
+                #endif
+
+                #if (WARP_BUILD_ENABLE_DEVINA219)
+                    warpPrint("\r\t- 'l' INA219 			(0x00--0x05): \n");
+                #else
+                    warpPrint("\r\t- 'l' INA219			(0x00--0x05): (compiled out) \n");
+                #endif
+
+                #if (WARP_BUILD_ENABLE_DEVPASCO2)
+                    warpPrint("\r\t- 'm' PASCO2 			(0x05--0x06)\n");
+                #else
+                    warpPrint("\r\t- 'm' PASCO2			(0x05--0x06) (compiled out) \n");
+                #endif
+
+                #if (WARP_BUILD_ENABLE_DEVBME280)
+                    warpPrint("\r\t- 'n' BME280 			(0xF7--0xFE)\n");
+                #else
+                    warpPrint("\r\t- 'n' BME280			(0xF7--0xFE): 1.95V -- 3.6V (compiled out) \n");
+                #endif
 
 				warpPrint("\r\tEnter selection> ");
 				key = warpWaitKey();
@@ -2245,7 +2293,7 @@ main(void)
 							menuI2cDevice = &deviceHDC1000State;
 							break;
 						}
-					#endif
+                    #endif
 
 #if (WARP_BUILD_ENABLE_DEVSI7021)
 					case '9':
@@ -2318,6 +2366,34 @@ main(void)
 						menuI2cDevice = &deviceAS7263State;
 						break;
 					}
+#endif
+
+
+#if (WARP_BUILD_ENABLE_DEVINA219)
+                    case 'l':
+                    {
+                        menuTargetSensor = kWarpSensorINA219;
+                        menuI2cDevice = &deviceINA219State;
+                        break;
+                    }
+#endif
+
+#if (WARP_BUILD_ENABLE_DEVPASCO2)
+                    case 'm':
+                    {
+                        menuTargetSensor = kWarpSensorPASCO2;
+                        menuI2cDevice = &devicePASCO2State;
+                        break;
+                    }
+#endif
+
+#if (WARP_BUILD_ENABLE_DEVBME280)
+                    case 'n':
+                    {
+                        menuTargetSensor = kWarpSensorBME280;
+                        menuI2cDevice = &deviceBME280State;
+                        break;
+                    }
 #endif
 					default:
 					{
@@ -2438,7 +2514,7 @@ main(void)
 						.baudRate_kbps = gWarpI2cBaudRateKbps
 					};
 
-					warpScaleSupplyVoltage(gWarpCurrentSupplyVoltage);
+					//warpScaleSupplyVoltage(gWarpCurrentSupplyVoltage);
 					warpEnableI2Cpins();
 
 					commandByte[0] = menuRegisterAddress;
@@ -2591,7 +2667,7 @@ main(void)
 			 */
 			case 'n':
 			{
-				warpScaleSupplyVoltage(gWarpCurrentSupplyVoltage);
+				//warpScaleSupplyVoltage(gWarpCurrentSupplyVoltage);
 				break;
 			}
 
@@ -2778,10 +2854,88 @@ main(void)
 		}
 	}
 
+
+#else // !WARP_DEBUG_INTERFACE
+
+/**********************************************************
+ * Polling every ~10 seconds:
+ *    1) Read PASCO2, BME280, MQ135 data
+ *    2) Calculate CO2 from regression model (MQ135, BME280)
+ *    3) Write both CO2 values to display and WarpPrint.
+ *    4) If trend is increasing or value over 1000, light OLED red
+ *********************************************************/
+
+
+
+#endif // WARP_DEBUG_INTERFACE
+
+    // Macro
+    #define CO2_ALARM (estimated_co2 > prev_estimated_co2) || (estimated_co2 > 1000)
+
+    uint16_t prev_estimated_co2 = 999;
+
+    while(1)
+    {
+
+        // Estimated CO2 from MQ135 and BME280, if available
+        uint16_t estimated_co2;
+
+        // Get MQ135 ADC value
+        uint8_t mq135_reading = getReadingMQ135();
+
+        // Get TPH
+        devBME280Results bme280_readings;
+
+        WarpStatus bme280ReadStatus = getReadingsBME280(&bme280_readings, 0);
+
+        if (bme280ReadStatus == kWarpStatusOK)
+        {
+            // Use multivariate model
+            estimated_co2 = - 26408 + ( 9318 * (uint64_t) bme280_readings.temp + 23 * (uint64_t) bme280_readings.pressure + 345516 * (uint64_t) (bme280_readings.humidity >> 10) + 63196 * (uint64_t) mq135_reading ) / 10000;
+
+        }
+
+        else
+        {
+            // Use model only from ADC value
+            estimated_co2 = - 953 + 19512 * mq135_reading / 1000;
+        }
+
+
+        // Get PASCO2 reading
+        uint16_t pasco2_reading = getReadingPASCO2();
+
+        // Write to WarpPrint
+        warpPrint("Temperature: %u degC;\t Pressure: %u hPa;\t Humidity: %u %%;\n", bme280_readings.temp, bme280_readings.pressure / 10000, bme280_readings.humidity >> 10);
+
+        warpPrint("Estimated CO2: %u ppm\n", estimated_co2);
+
+        warpPrint("PASCO2: %u ppm\n\n", pasco2_reading);
+
+        // Write to screen
+        char pasco2_printout[5];
+        sprintf(pasco2_printout, "%4u\0", pasco2_reading);
+
+        char estimated_co2_printout[5];
+        sprintf(estimated_co2_printout, "%4u\0", estimated_co2);
+
+        // Red background if co2 is in alarm
+        if (CO2_ALARM) devSSD1331DrawRectangle(0x00, 0x3E, 0x00, 0x5E, red, red);
+        else devSSD1331ClearScreen();
+
+        devSSD1331print(10, 10, pasco2_printout, white);
+
+        devSSD1331print(10, 30, estimated_co2_printout, white);
+
+        prev_estimated_co2 = estimated_co2;
+
+        OSA_TimeDelay(10000);
+    }
+
 	return 0;
-}
+} // main
 
-
+#if (WARP_DEBUG_INTERFACE)
 
 void
 printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelayBetweenEachRun, bool loopForever)
@@ -2802,7 +2956,7 @@ printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelay
 	numberOfConfigErrors += configureSensorMMA8451Q(0x00,/* Payload: Disable FIFO */
 					0x01/* Normal read 8bit, 800Hz, normal, active mode */
 					);
-	#endif
+    #endif
 	#if (WARP_BUILD_ENABLE_DEVMAG3110)
 	numberOfConfigErrors += configureSensorMAG3110(	0x00,/*	Payload: DR 000, OS 00, 80Hz, ADC 1280, Full 16bit, standby mode to set up register*/
 					0xA0,/*	Payload: AUTO_MRST_EN enable, RAW value without offset */
@@ -2908,7 +3062,23 @@ printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelay
 
 		#if (WARP_BUILD_ENABLE_DEVHDC1000)
 			warpPrint(" HDC1000 Temp, HDC1000 Hum,");
-		#endif
+        #endif
+
+        #if (WARP_BUILD_ENABLE_DEVINA219)
+            warpPrint(" INA219 shunt V, INA219 Bus V, INA219 power, INA219 current, ");
+        #endif
+
+        #if (WARP_BUILD_ENABLE_DEVPASCO2)
+            warpPrint(" CO2, CO2 Status, ");
+        #endif
+
+        #if (WARP_BUILD_ENABLE_DEVBME280)
+            warpPrint(" temp, pressure, humidity, BME280 status, ");
+        #endif
+
+        #if (WARP_BUILD_ENABLE_DEVMQ135)
+                warpPrint(" MQ135 ADC, ");
+        #endif
 
 		warpPrint(" RTC->TSR, RTC->TPR, # Config Errors");
 		warpPrint("\n\n");
@@ -2954,7 +3124,23 @@ printAllSensors(bool printHeadersAndCalibration, bool hexModeFlag, int menuDelay
 
 		#if (WARP_BUILD_ENABLE_DEVHDC1000)
 			printSensorDataHDC1000(hexModeFlag);
-		#endif
+        #endif
+
+        #if (WARP_BUILD_ENABLE_DEVINA219)
+            printSensorDataINA219(hexModeFlag);
+        #endif
+
+        #if (WARP_BUILD_ENABLE_DEVPASCO2)
+            printSensorDataPASCO2(hexModeFlag);
+        #endif
+
+        #if (WARP_BUILD_ENABLE_DEVBME280)
+            printSensorDataBME280(hexModeFlag);
+        #endif
+
+        #if (WARP_BUILD_ENABLE_DEVMQ135)
+            printSensorDataMQ135(hexModeFlag);
+        #endif
 
 		warpPrint(" %12d, %6d, %2u\n", RTC->TSR, RTC->TPR, numberOfConfigErrors);
 
@@ -3002,7 +3188,7 @@ loopForSensor(	const char *  tagString,
 		warpPrint(RTT_CTRL_RESET RTT_CTRL_BG_BRIGHT_YELLOW RTT_CTRL_TEXT_BRIGHT_WHITE kWarpConstantStringErrorSanity RTT_CTRL_RESET "\n");
 	}
 
-	warpScaleSupplyVoltage(actualSssupplyMillivolts);
+	//warpScaleSupplyVoltage(actualSssupplyMillivolts);
 	warpPrint(tagString);
 
 	/*
@@ -3020,7 +3206,7 @@ loopForSensor(	const char *  tagString,
 				if (actualSssupplyMillivolts > sssupplyMillivolts)
 				{
 					actualSssupplyMillivolts -= 100;
-					warpScaleSupplyVoltage(actualSssupplyMillivolts);
+					//warpScaleSupplyVoltage(actualSssupplyMillivolts);
 				}
 
 				if (spiDeviceState)
@@ -3063,7 +3249,7 @@ loopForSensor(	const char *  tagString,
 				if (actualSssupplyMillivolts < adaptiveSssupplyMaxMillivolts)
 				{
 					actualSssupplyMillivolts += 100;
-					warpScaleSupplyVoltage(actualSssupplyMillivolts);
+					//warpScaleSupplyVoltage(actualSssupplyMillivolts);
 				}
 			}
 			else if (status == kWarpStatusBadDeviceCommand)
@@ -3607,6 +3793,94 @@ repeatRegisterReadForDeviceAndAddress(WarpSensorDevice warpSensorDevice, uint8_t
 			break;
 		}
 
+        case kWarpSensorINA219:
+        {
+            /*
+             *	INA219: VDD 1.95--3.6
+             */
+            #if (WARP_BUILD_ENABLE_DEVINA219)
+            loopForSensor(	"\r\nINA219:\n\r",		/*	tagString			*/
+                              &readSensorRegisterINA219,	/*	readSensorRegisterFunction	*/
+                              &deviceINA219State,		/*	i2cDeviceState			*/
+                              NULL,				/*	spiDeviceState			*/
+                              baseAddress,			/*	baseAddress			*/
+                              0x00,				/*	minAddress			*/
+                              0x05,				/*	maxAddress			*/
+                              repetitionsPerAddress,		/*	repetitionsPerAddress		*/
+                              chunkReadsPerAddress,		/*	chunkReadsPerAddress		*/
+                              spinDelay,			/*	spinDelay			*/
+                              autoIncrement,			/*	autoIncrement			*/
+                              sssupplyMillivolts,		/*	sssupplyMillivolts		*/
+                              referenceByte,			/*	referenceByte			*/
+                              adaptiveSssupplyMaxMillivolts,	/*	adaptiveSssupplyMaxMillivolts	*/
+                              chatty				/*	chatty				*/
+            );
+            #else
+            warpPrint("\r\n\tINA219 Read Aborted. Device Disabled :(");
+            #endif
+
+            break;
+        }
+
+    case kWarpSensorPASCO2:
+        {
+            /*
+             *	INA219: VDD 1.95--3.6
+             */
+            #if (WARP_BUILD_ENABLE_DEVPASCO2)
+            loopForSensor(	"\r\nPASCO2:\n\r",		/*	tagString			*/
+                              &readSensorRegisterPASCO2,	/*	readSensorRegisterFunction	*/
+                              &devicePASCO2State,		/*	i2cDeviceState			*/
+                              NULL,				/*	spiDeviceState			*/
+                              baseAddress,			/*	baseAddress			*/
+                              0x05,				/*	minAddress			*/
+                              0x06,				/*	maxAddress			*/
+                              repetitionsPerAddress,		/*	repetitionsPerAddress		*/
+                              chunkReadsPerAddress,		/*	chunkReadsPerAddress		*/
+                              spinDelay,			/*	spinDelay			*/
+                              autoIncrement,			/*	autoIncrement			*/
+                              sssupplyMillivolts,		/*	sssupplyMillivolts		*/
+                              referenceByte,			/*	referenceByte			*/
+                              adaptiveSssupplyMaxMillivolts,	/*	adaptiveSssupplyMaxMillivolts	*/
+                              chatty				/*	chatty				*/
+            );
+            #else
+            warpPrint("\r\n\tPASCO2 Read Aborted. Device Disabled :(");
+            #endif
+
+            break;
+        }
+
+
+    case kWarpSensorBME280:
+        {
+            /*
+             *	BME280: VDD 1.95--3.6
+             */
+            #if (WARP_BUILD_ENABLE_DEVBME280)
+            loopForSensor(	"\r\nBME280:\n\r",		/*	tagString			*/
+                              &readSensorRegisterBME280,	/*	readSensorRegisterFunction	*/
+                              &deviceBME280State,		/*	i2cDeviceState			*/
+                              NULL,				/*	spiDeviceState			*/
+                              baseAddress,			/*	baseAddress			*/
+                              0xF7,				/*	minAddress			*/
+                              0xFE,				/*	maxAddress			*/
+                              repetitionsPerAddress,		/*	repetitionsPerAddress		*/
+                              chunkReadsPerAddress,		/*	chunkReadsPerAddress		*/
+                              spinDelay,			/*	spinDelay			*/
+                              autoIncrement,			/*	autoIncrement			*/
+                              sssupplyMillivolts,		/*	sssupplyMillivolts		*/
+                              referenceByte,			/*	referenceByte			*/
+                              adaptiveSssupplyMaxMillivolts,	/*	adaptiveSssupplyMaxMillivolts	*/
+                              chatty				/*	chatty				*/
+            );
+            #else
+            warpPrint("\r\n\tBME280 Read Aborted. Device Disabled :(");
+            #endif
+
+            break;
+        }
+
 		default:
 		{
 			warpPrint("\r\tInvalid warpSensorDevice [%d] passed to repeatRegisterReadForDeviceAndAddress.\n", warpSensorDevice);
@@ -3907,3 +4181,5 @@ activateAllLowPowerSensorModes(bool verbose)
 		GPIO_DRV_ClearPinOutput(kWarpPinSI4705_nRST);
 	#endif
 }
+
+#endif // WARP_DEBUG_INTERFACE

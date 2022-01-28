@@ -70,6 +70,9 @@ typedef enum
 {
 	kWarpSensorADXL362,
 	kWarpSensorMMA8451Q,
+	kWarpSensorINA219,
+	kWarpSensorPASCO2,
+	kWarpSensorBME280,
 	kWarpSensorBME680,
 	kWarpSensorBMX055accel,
 	kWarpSensorBMX055gyro,
@@ -294,7 +297,7 @@ typedef struct
 	uint8_t			errorCount;
 } WarpPowerManagerCallbackStructure;
 
-void		warpScaleSupplyVoltage(uint16_t voltageMillivolts);
+//void		warpScaleSupplyVoltage(uint16_t voltageMillivolts);
 void		warpDisableSupplyVoltage(void);
 WarpStatus	warpSetLowPowerMode(WarpPowerMode powerMode, uint32_t sleepSeconds);
 void		warpEnableI2Cpins(void);

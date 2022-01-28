@@ -1,3 +1,23 @@
+# Low-Cost CO2 monitor
+Based on FRDM-KL03Z on Warp Firmware, using MQ-135 gas sensor, BME280 TPH sensor, Adafruit OLED (SSD1331) and Infineon 
+PASCO2 CO2 sensor.
+
+This project seeks to evaluate the use of the MQ-135 low-cost gas sensor alongside the BME280 TPH sensor as a means of
+estimating the CO2 concentration in the atmosphere. The PASCO2 is used as a reference measure for CO2. A simple 
+multivariate regression model using the TPH, MQ-135 readings is used as default, and when the BME280 is unavailable, a 
+univariate model using just MQ-135 readings is used.
+
+Directory `octave-script` contains the Octave/Matlab script `mq135_regression.m` and data used to make the models.
+Sensors are added using the Warp template as `devBME280.c/h` etc.
+
+Key files:
+`devBME280.c/h`, `devSSD1331.c/h`, `fonts.h`, `devPASCO2.c/h`, `devMQ135.c/h`, `boot.c`.
+
+Files `devSDSPI.c/h` were written but dropped (treat as untested) due to shortage of program flash.
+
+Andrew Salkeld (ajs327@cam.ac.uk), Fitzwilliam College.
+
+Old Warp Firmware README replicated below (so the diff isn't too big!).
 # Baseline firmware for the [Warp](https://github.com/physical-computation/Warp-hardware) family of hardware platforms
 This is the firmware for the [Warp hardware](https://github.com/physical-computation/Warp-hardware) and its publicly available and unpublished derivatives. This firmware also runs on the Freescale/NXP FRDM KL03 evaluation board which we use for teaching at the University of Cambridge. When running on platforms other than Warp, only the sensors available in the corresponding hardware platform are accessible.
 

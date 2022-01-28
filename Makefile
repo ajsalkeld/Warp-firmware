@@ -11,6 +11,9 @@ warp:
 	cp src/boot/ksdk1.1.0/SEGGER*					build/ksdk1.1/work/demos/Warp/src/
 	cp src/boot/ksdk1.1.0/config.h					build/ksdk1.1/work/demos/Warp/src/
 	cp src/boot/ksdk1.1.0/boot.c					build/ksdk1.1/work/demos/Warp/src/
+	cp src/boot/ksdk1.1.0/devSSD1331.*					build/ksdk1.1/work/demos/Warp/src/
+	cp src/boot/ksdk1.1.0/devMQ135.*					build/ksdk1.1/work/demos/Warp/src/
+	cp src/boot/ksdk1.1.0/fonts.h					build/ksdk1.1/work/demos/Warp/src/
 	cp src/boot/ksdk1.1.0/errstrs*					build/ksdk1.1/work/demos/Warp/src/
 	cp src/boot/ksdk1.1.0/powermodes.c				build/ksdk1.1/work/demos/Warp/src/
 	cp src/boot/ksdk1.1.0/warp.h					build/ksdk1.1/work/demos/Warp/src/
@@ -23,6 +26,9 @@ warp:
 	cp src/boot/ksdk1.1.0/devBMX055.*				build/ksdk1.1/work/demos/Warp/src/
 	cp src/boot/ksdk1.1.0/devADXL362.*				build/ksdk1.1/work/demos/Warp/src/
 	cp src/boot/ksdk1.1.0/devMMA8451Q.*				build/ksdk1.1/work/demos/Warp/src/
+	cp src/boot/ksdk1.1.0/devINA219.*				build/ksdk1.1/work/demos/Warp/src/
+	cp src/boot/ksdk1.1.0/devPASCO2.*				build/ksdk1.1/work/demos/Warp/src/
+	cp src/boot/ksdk1.1.0/devBME280.*				build/ksdk1.1/work/demos/Warp/src/
 	cp src/boot/ksdk1.1.0/devLPS25H.*				build/ksdk1.1/work/demos/Warp/src/
 	cp src/boot/ksdk1.1.0/devHDC1000.*				build/ksdk1.1/work/demos/Warp/src/
 	cp src/boot/ksdk1.1.0/devMAG3110.*				build/ksdk1.1/work/demos/Warp/src/
@@ -73,7 +79,7 @@ glaux:
 	@echo "\n\nNow, run\n\n\tmake load-glaux\n\n"
 
 load-warp:
-	$(JLINKPATH) -device MKL03Z32XXX4 -if SWD -speed 10000 -CommanderScript tools/scripts/warp.jlink.commands
+	$(JLINKPATH) -NoGui 1 -device MKL03Z32XXX4 -if SWD -speed 10000 -CommanderScript tools/scripts/warp.jlink.commands
 
 load-glaux:
 	$(JLINKPATH) -device MKL03Z32XXX4 -if SWD -speed 10000 -CommanderScript tools/scripts/glaux.jlink.commands

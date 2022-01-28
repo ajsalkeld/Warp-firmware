@@ -48,7 +48,9 @@ enum _gpio_pins
 
 	kWarpPinSPI_MISO_UART_RTS		= GPIO_MAKE_PIN(HW_GPIOA, 6),
 	kWarpPinSPI_MOSI_UART_CTS		= GPIO_MAKE_PIN(HW_GPIOA, 7),
+	#if (WARP_BUILD_ENABLE_DEVADXL362)
 	kWarpPinADXL362_SPI_nCS			= GPIO_MAKE_PIN(HW_GPIOA, 8),
+	#endif
 
 	#if (WARP_BUILD_ENABLE_GLAUX_VARIANT)
 		kWarpPinSPI_SCK			= GPIO_MAKE_PIN(HW_GPIOA, 9),
@@ -80,9 +82,25 @@ enum _gpio_pins
 	kWarpPinTPS62740_VSEL2			= GPIO_MAKE_PIN(HW_GPIOB, 10),
 	kWarpPinTPS62740_VSEL1			= GPIO_MAKE_PIN(HW_GPIOB, 11),
 	kWarpPinCLKOUT32K			= GPIO_MAKE_PIN(HW_GPIOB, 13),
+    #if (WARP_BUILD_ENABLE_DEVSSD1331)
+    kSSD1331PinMOSI		= GPIO_MAKE_PIN(HW_GPIOA, 8),
+    kSSD1331PinSCK		= GPIO_MAKE_PIN(HW_GPIOA, 9),
+    kSSD1331PinCSn		= GPIO_MAKE_PIN(HW_GPIOB, 13),
+    kSSD1331PinDC		= GPIO_MAKE_PIN(HW_GPIOA, 12),
+    kSSD1331PinRST		= GPIO_MAKE_PIN(HW_GPIOB, 0),
+    #endif
+    #if (WARP_BUILD_ENABLE_DEVSDSPI)
+    kSDSPIPinCSn = GPIO_MAKE_PIN(HW_GPIOB, 1), // find another
+    #endif
+    #if (WARP_BUILD_ENABLE_DEVMQ135)
+    kMQ135ADC = GPIO_MAKE_PIN(HW_GPIOB, 1),
+    #endif
 };
 
 extern gpio_input_pin_user_config_t	inputPins[];
 extern gpio_output_pin_user_config_t	outputPins[];
 extern gpio_input_pin_user_config_t	wakeupPins[];
+
+extern uint8_t spi_enabled;
+
 #endif /* __FSL_GPIO_PINS_H__ */
