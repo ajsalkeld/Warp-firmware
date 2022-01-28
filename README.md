@@ -10,6 +10,11 @@ univariate model using just MQ-135 readings is used.
 Directory `octave-script` contains the Octave/Matlab script `mq135_regression.m` and data used to make the models.
 Sensors are added using the Warp template as `devBME280.c/h` etc.
 
+Key files:
+`devBME280.c/h`, `devSSD1331.c/h`, `fonts.h`, `devPASCO2.c/h`, `devMQ135.c/h`, `boot.c`.
+
+Files `devSDSPI.c/h` were written but dropped (treat as untested) due to shortage of program flash.
+
 Andrew Salkeld (ajs327@cam.ac.uk), Fitzwilliam College.
 
 Old Warp Firmware README replicated below (so the diff isn't too big!).
